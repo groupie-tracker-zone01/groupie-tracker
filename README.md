@@ -2,6 +2,29 @@
 
 Projet de groupe réalisé dans le cadre de Zone01 Normandie.
 
+## Lancer le projet
+
+Le serveur utilise le port `8080` par défaut :
+
+```sh
+go run .
+```
+
+La page temporaire est ensuite accessible à l'adresse <http://localhost:8080>.
+
+Pour utiliser un autre port :
+
+```sh
+PORT=9090 go run .
+```
+
+## Vérifier le projet
+
+```sh
+gofmt -w .
+go test ./...
+```
+
 ## Organisation
 
 - Responsable d'équipe : Léandre Mauger-Longuemare
