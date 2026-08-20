@@ -7,6 +7,7 @@ import {
   buildManagedLabels,
   deriveJiraTarget,
   fetchWithRetry,
+  jiraEndpoint,
   RequestError,
   synchronizeEntry,
   validateJiraBaseUrl,
@@ -246,7 +247,12 @@ test("le mapping refuse toute autre série que SCRUM-1 à SCRUM-16", async () =>
 
 test("l’URL Jira doit rester sur un hôte Atlassian HTTPS sûr", () => {
   assert.equal(validateJiraBaseUrl("https://example.atlassian.net").hostname, "example.atlassian.net");
-  assert.throws(() => validateJiraBaseUrl("http://example.atlassian.net"), /URL HTTPS Atlassian/);
-  assert.throws(() => validateJiraBaseUrl("https://evil.test"), /URL HTTPS Atlassian/);
-  assert.throws(() => validateJiraBaseUrl("https://user:secret@example.atlassian.net"), /URL HTTPS Atlassian/);
+  const scoped = "https://api.atlassian.com/ex/jira/696029ff-b2e6-40cb-83e6-4484d60935a8";
+  assert.equal(
+    jiraEndpoint(scoped, "/rest/api/3/issue/SCRUM-1").href,
+    `${scoped}/rest/api/3/issue/SCRUM-1`
+  );
+  assert.throws(() => validateJiraBaseUrl("http://example.atlassian.net"), /URL HTTPS du site Atlassian/);
+  assert.throws(() => validateJiraBaseUrl("https://evil.test"), /URL HTTPS du site Atlassian/);
+  assert.throws(() => validateJiraBaseUrl("https://user:secret@example.atlassian.net"), /URL HTTPS du site Atlassian/);
 });

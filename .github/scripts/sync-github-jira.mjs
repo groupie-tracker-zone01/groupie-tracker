@@ -343,25 +343,28 @@ async function loadGitHubState(repository, token) {
 
 export function validateJiraBaseUrl(baseUrl) {
   const base = new URL(baseUrl);
-  if (
-    base.protocol !== "https:" ||
-    base.username ||
-    base.password ||
-    base.search ||
-    base.hash ||
-    base.pathname !== "/" ||
-    !base.hostname.endsWith(".atlassian.net")
-  ) {
-    throw new Error("JIRA_BASE_URL doit être une URL HTTPS Atlassian sans identifiants, chemin, paramètres ni fragment.");
+  const hasUnsafeParts = base.protocol !== "https:" || base.username || base.password || base.search || base.hash;
+  const classicEndpoint = base.hostname.endsWith(".atlassian.net") && base.pathname === "/";
+  const scopedEndpoint = base.hostname === "api.atlassian.com" &&
+    /^\/ex\/jira\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/?$/i.test(base.pathname);
+
+  if (hasUnsafeParts || (!classicEndpoint && !scopedEndpoint)) {
+    throw new Error("JIRA_BASE_URL doit être l’URL HTTPS du site Atlassian ou l’URL officielle d’un jeton Jira scoped.");
   }
+  if (!base.pathname.endsWith("/")) base.pathname += "/";
   return base;
+}
+
+export function jiraEndpoint(baseUrl, path) {
+  const base = validateJiraBaseUrl(baseUrl);
+  return new URL(String(path).replace(/^\/+/, ""), base);
 }
 
 function jiraClient(baseUrl, email, token) {
   const base = validateJiraBaseUrl(baseUrl);
   const authorization = `Basic ${Buffer.from(`${email}:${token}`).toString("base64")}`;
 
-  return async (path, options = {}, retryOptions = {}) => jsonRequest(new URL(path, base), {
+  return async (path, options = {}, retryOptions = {}) => jsonRequest(jiraEndpoint(base, path), {
     ...options,
     headers: {
       accept: "application/json",
