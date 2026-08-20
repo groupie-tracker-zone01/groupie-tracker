@@ -2,6 +2,15 @@
 
 Projet de groupe réalisé dans le cadre de Zone01 Normandie.
 
+[![CI Go](https://github.com/groupie-tracker-zone01/groupie-tracker/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/groupie-tracker-zone01/groupie-tracker/actions/workflows/ci.yml)
+
+## Suivi de l’équipe
+
+- [Tableau des tickets](https://github.com/orgs/groupie-tracker-zone01/projects/1)
+- [Plan visuel des branches et des merges](https://groupie-tracker-zone01.github.io/groupie-tracker/)
+- [Network Graph Git réel](https://github.com/groupie-tracker-zone01/groupie-tracker/network)
+- [Jira SCRUM](https://maugerlonguemareleandre.atlassian.net/issues/?jql=project%20%3D%20SCRUM%20ORDER%20BY%20key%20ASC)
+
 ## Lancer le projet
 
 Le serveur utilise le port `8080` par défaut :
