@@ -122,6 +122,57 @@
 
     .action-link.primary:hover { background: #388bfd; }
 
+    .live-status { margin-bottom: 18px; }
+
+    .live-heading {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .live-heading h2 { margin: 0 0 4px; font-size: 17px; }
+    .live-heading span { color: var(--muted); font-size: 12px; }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+      gap: 10px;
+    }
+
+    .status-card {
+      --status-color: var(--muted);
+      min-height: 112px;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--status-color);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .status-card[data-state="ok"] { --status-color: var(--ready); }
+    .status-card[data-state="warning"] { --status-color: var(--verify); }
+    .status-card[data-state="error"] { --status-color: var(--danger); }
+    .status-card[data-state="info"] { --status-color: var(--active); }
+
+    .status-label,
+    .status-detail {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-value {
+      display: block;
+      margin: 9px 0;
+      color: var(--status-color);
+      font-size: 16px;
+    }
+
+    .status-detail {
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
     .network-panel {
       overflow: hidden;
       border: 1px solid var(--border);
@@ -249,7 +300,7 @@
 
     .today {
       position: absolute;
-      left: 260px;
+      left: 340px;
       top: 58px;
       bottom: 54px;
       z-index: 2;
@@ -559,6 +610,57 @@
   </header>
 
   <main>
+    <section class="live-status" aria-labelledby="live-heading" aria-busy="true" aria-live="polite">
+      <div class="live-heading">
+        <div>
+          <h2 id="live-heading">État GitHub en direct</h2>
+          <span id="live-updated">Chargement des données publiques…</span>
+        </div>
+      </div>
+
+      <div class="status-grid">
+        <article class="status-card" id="status-repo" data-state="loading">
+          <span class="status-label">Dépôt</span>
+          <strong class="status-value">Chargement…</strong>
+          <a class="status-detail" href="https://github.com/groupie-tracker-zone01/groupie-tracker">Ouvrir le dépôt</a>
+        </article>
+
+        <article class="status-card" id="status-main" data-state="loading">
+          <span class="status-label">Branche main</span>
+          <strong class="status-value">Chargement…</strong>
+          <a class="status-detail" href="https://github.com/groupie-tracker-zone01/groupie-tracker/settings/branches">Voir les règles</a>
+        </article>
+
+        <article class="status-card" id="status-ci" data-state="loading">
+          <span class="status-label">CI Go</span>
+          <strong class="status-value">Chargement…</strong>
+          <a class="status-detail" href="https://github.com/groupie-tracker-zone01/groupie-tracker/actions/workflows/ci.yml">Voir les exécutions</a>
+        </article>
+
+        <article class="status-card" id="status-jira" data-state="loading">
+          <span class="status-label">GitHub → Jira</span>
+          <strong class="status-value">Chargement…</strong>
+          <a class="status-detail" href="https://github.com/groupie-tracker-zone01/groupie-tracker/actions/workflows/sync-jira.yml">Voir les synchronisations</a>
+        </article>
+
+        <article class="status-card" id="status-issues" data-state="loading">
+          <span class="status-label">Tickets GitHub</span>
+          <strong class="status-value">Chargement…</strong>
+          <a class="status-detail" href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues">Voir les tickets</a>
+        </article>
+
+        <article class="status-card" data-state="info">
+          <span class="status-label">Vues équipe</span>
+          <strong class="status-value">Project et Network</strong>
+          <span class="status-detail">
+            <a href="https://github.com/orgs/groupie-tracker-zone01/projects/1">Project</a>
+            ·
+            <a href="https://github.com/groupie-tracker-zone01/groupie-tracker/network">Network</a>
+          </span>
+        </article>
+      </div>
+    </section>
+
     <section class="network-panel" aria-labelledby="network-heading">
       <div class="network-toolbar">
         <div class="network-title">
@@ -567,7 +669,7 @@
         </div>
         <div class="view-switch" role="group" aria-label="Choisir la vue">
           <button class="view-button" type="button" data-view="plan" aria-pressed="true">Plan complet</button>
-          <button class="view-button" type="button" data-view="actual" aria-pressed="false">Git réel aujourd’hui</button>
+          <button class="view-button" type="button" data-view="actual" aria-pressed="false">État dessiné</button>
         </div>
       </div>
 
@@ -600,16 +702,16 @@
           <span class="commit" style="left: 150px"><span>Header</span></span>
           <span class="commit" style="left: 205px"><span>Test branch</span></span>
 
-          <a class="ticket above align-left" data-status="active" data-kind="actual" style="--x: 235px; --y: 250px" href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/1" target="_blank" rel="noreferrer" aria-label="Ticket 1, serveur Go, en cours par Léandre">
-            <span class="ticket-copy"><strong>#1 · Serveur Go</strong><small>Léandre · PR #3</small></span>
+          <a class="ticket above align-left" data-status="ready" data-kind="actual" style="--x: 235px; --y: 250px" href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/1" target="_blank" rel="noreferrer" aria-label="Ticket 1, serveur Go, fusionné via la Pull Request 3">
+            <span class="ticket-copy"><strong>#1 · Serveur Go</strong><small>fusionné via PR #3</small></span>
           </a>
 
-          <a class="ticket above" data-status="ready" data-kind="planned" style="--x: 405px; --y: 165px" href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/2" target="_blank" rel="noreferrer" aria-label="Ticket 2, Docker, prochain libre après le ticket 1">
-            <span class="ticket-copy"><strong>#2 · Docker</strong><small>libre après #1</small></span>
+          <a class="ticket above" data-status="ready" data-kind="planned" style="--x: 405px; --y: 165px" href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/2" target="_blank" rel="noreferrer" aria-label="Ticket 2, Docker, libre maintenant">
+            <span class="ticket-copy"><strong>#2 · Docker</strong><small>libre maintenant</small></span>
           </a>
 
-          <a class="ticket below" data-status="assigned" data-kind="planned" style="--x: 420px; --y: 505px" href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/4" target="_blank" rel="noreferrer" aria-label="Ticket 4, modèles API, réservé à Max après le ticket 1">
-            <span class="ticket-copy"><strong>#4 · Modèles API</strong><small>Max · attend #1</small></span>
+          <a class="ticket below" data-status="assigned" data-kind="planned" style="--x: 420px; --y: 505px" href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/4" target="_blank" rel="noreferrer" aria-label="Ticket 4, modèles API, réservé à Max et prêt à commencer">
+            <span class="ticket-copy"><strong>#4 · Modèles API</strong><small>Max · peut commencer</small></span>
           </a>
 
           <a class="ticket below" data-status="blocked" data-kind="planned" style="--x: 575px; --y: 570px" href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/5" target="_blank" rel="noreferrer" aria-label="Ticket 5, client API, attend le ticket 4">
@@ -656,7 +758,7 @@
             <span class="ticket-copy"><strong>#12 · Recette finale</strong><small>tout converge ici</small></span>
           </a>
 
-          <span class="merge" data-kind="planned" style="--x: 330px"><i class="merge-shape"></i><span>merge #1</span></span>
+          <span class="merge" data-kind="actual" style="--x: 330px"><i class="merge-shape"></i><span>merge PR #3</span></span>
           <span class="merge" data-kind="planned" style="--x: 500px"><i class="merge-shape"></i><span>#2 + #4</span></span>
           <span class="merge" data-kind="planned" style="--x: 650px"><i class="merge-shape"></i><span>merge #5</span></span>
           <span class="merge" data-kind="planned" style="--x: 940px"><i class="merge-shape"></i><span>merge #6</span></span>
@@ -672,15 +774,15 @@
     <section class="decision-grid" aria-label="Décisions immédiates">
       <article class="decision-card" style="--card-color: var(--active)">
         <h3>En cours</h3>
-        <p><a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/1" target="_blank" rel="noreferrer">#1</a> par Léandre. <a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/6" target="_blank" rel="noreferrer">#6</a> et sa sous-tâche <a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/20" target="_blank" rel="noreferrer">#20</a> par Rafa.</p>
+        <p><a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/1" target="_blank" rel="noreferrer">#1</a> est fusionné. <a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/6" target="_blank" rel="noreferrer">#6</a> et sa sous-tâche <a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/20" target="_blank" rel="noreferrer">#20</a> sont pris par Rafa.</p>
       </article>
       <article class="decision-card" style="--card-color: var(--assigned)">
         <h3>Réservé</h3>
-        <p><a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/4" target="_blank" rel="noreferrer">#4 · Modèles API</a> appartient à Max. Il commence dès que <strong>#1</strong> est fusionné.</p>
+        <p><a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/4" target="_blank" rel="noreferrer">#4 · Modèles API</a> appartient à Max. Le prérequis <strong>#1</strong> est fusionné : il peut commencer.</p>
       </article>
       <article class="decision-card" style="--card-color: var(--ready)">
         <h3>Prochain libre</h3>
-        <p><a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/2" target="_blank" rel="noreferrer">#2 · Docker</a> est le premier ticket autonome libre après le merge de <strong>#1</strong>.</p>
+        <p><a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues/2" target="_blank" rel="noreferrer">#2 · Docker</a> est maintenant le premier ticket autonome libre.</p>
       </article>
       <article class="decision-card" style="--card-color: var(--verify)">
         <h3>Avant de coder</h3>
@@ -702,7 +804,7 @@
   </main>
 
   <footer>
-    <span>État du Project vérifié le 20 août 2026 · plan prévisionnel, pas historique Git.</span>
+    <span>Plan prévisionnel · les cartes ci-dessus sont chargées en direct depuis l’API publique GitHub.</span>
     <a href="https://github.com/groupie-tracker-zone01/groupie-tracker/issues" target="_blank" rel="noreferrer">Voir tous les tickets</a>
   </footer>
 
@@ -782,15 +884,9 @@
           context.moveTo(92, mainY);
           context.bezierCurveTo(122, mainY, 122, 250, 160, 250);
           context.lineTo(250, 250);
+          context.lineTo(278, 250);
+          context.bezierCurveTo(306, 250, 306, mainY, 330, mainY);
         }, 4);
-
-        if (currentView === 'plan') {
-          strokePath(colors.active, true, () => {
-            context.moveTo(250, 250);
-            context.lineTo(278, 250);
-            context.bezierCurveTo(306, 250, 306, mainY, 330, mainY);
-          }, 3);
-        }
       }
 
       function drawBackground() {
@@ -811,12 +907,12 @@
       function drawMain() {
         strokePath(colors.main, false, () => {
           context.moveTo(46, mainY);
-          context.lineTo(260, mainY);
+          context.lineTo(330, mainY);
         }, 5);
 
         if (currentView === 'plan') {
           strokePath('#8b949e', true, () => {
-            context.moveTo(260, mainY);
+            context.moveTo(330, mainY);
             context.lineTo(1555, mainY);
           }, 4);
         }
@@ -850,6 +946,115 @@
 
       prepareCanvas();
       draw();
+    })();
+  </script>
+
+  <script>
+    (() => {
+      const api = 'https://api.github.com/repos/groupie-tracker-zone01/groupie-tracker';
+      const section = document.querySelector('.live-status');
+      const updated = document.getElementById('live-updated');
+
+      const formatTime = (value) => new Intl.DateTimeFormat('fr-FR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+        timeZone: 'Europe/Paris'
+      }).format(new Date(value));
+
+      async function get(path, allow404 = false) {
+        const response = await fetch(`${api}${path}`, {
+          headers: { Accept: 'application/vnd.github+json' }
+        });
+        if (allow404 && response.status === 404) return null;
+        if (!response.ok) throw new Error(`GitHub API ${response.status}`);
+        return response.json();
+      }
+
+      function render(id, state, value, detail, href) {
+        const card = document.getElementById(id);
+        card.dataset.state = state;
+        card.querySelector('.status-value').textContent = value;
+        const target = card.querySelector('.status-detail');
+        target.textContent = detail;
+        if (href) target.href = href;
+      }
+
+      function failed(id) {
+        render(id, 'error', 'Indisponible', 'Recharger la page');
+      }
+
+      function renderRun(cardId, payload, missingText, staleAfterMinutes = 0) {
+        const run = payload?.workflow_runs?.[0];
+        if (!run) {
+          render(cardId, 'warning', missingText, 'Aucune exécution disponible');
+          return;
+        }
+
+        const running = run.status !== 'completed';
+        const success = run.conclusion === 'success';
+        const stale = success && staleAfterMinutes > 0 &&
+          Date.now() - new Date(run.updated_at).getTime() > staleAfterMinutes * 60 * 1000;
+        const labels = {
+          success: 'Réussie',
+          failure: 'Échec',
+          cancelled: 'Annulée',
+          timed_out: 'Temps dépassé'
+        };
+
+        render(
+          cardId,
+          running || stale ? 'warning' : success ? 'ok' : 'error',
+          running ? 'En cours' : stale ? 'En retard' : labels[run.conclusion] || run.conclusion,
+          `${stale ? 'Dernier succès · ' : ''}${formatTime(run.updated_at)}`,
+          run.html_url
+        );
+      }
+
+      const repoTask = get('').then((repo) => {
+        const isPublic = !repo.private && repo.visibility === 'public';
+        render(
+          'status-repo',
+          isPublic ? 'ok' : 'error',
+          repo.private ? 'Privé' : 'Public',
+          repo.full_name,
+          repo.html_url
+        );
+      }).catch(() => failed('status-repo'));
+
+      const mainTask = get('/branches/main').then((branch) => {
+        render(
+          'status-main',
+          branch.protected ? 'ok' : 'error',
+          branch.protected ? 'Protégée' : 'Non protégée',
+          `Commit ${branch.commit.sha.slice(0, 7)}`
+        );
+      }).catch(() => failed('status-main'));
+
+      const ciTask = get('/actions/workflows/ci.yml/runs?branch=main&per_page=1')
+        .then((data) => renderRun('status-ci', data, 'Jamais exécutée'))
+        .catch(() => failed('status-ci'));
+
+      const jiraTask = get('/actions/workflows/sync-jira.yml/runs?branch=main&per_page=1', true)
+        .then((data) => {
+          if (!data) {
+            render('status-jira', 'warning', 'Pas encore publiée', 'Workflow absent de main');
+            return;
+          }
+          renderRun('status-jira', data, 'Jamais exécutée', 20);
+        })
+        .catch(() => failed('status-jira'));
+
+      const issuesTask = get('/issues?state=all&per_page=100').then((items) => {
+        const issues = items.filter((item) => !item.pull_request);
+        const open = issues.filter((issue) => issue.state === 'open').length;
+        const closed = issues.length - open;
+        render('status-issues', 'info', `${open} ouverts · ${closed} fermés`, `${issues.length} tickets`);
+      }).catch(() => failed('status-issues'));
+
+      Promise.allSettled([repoTask, mainTask, ciTask, jiraTask, issuesTask]).then(() => {
+        updated.textContent = `API GitHub lue le ${formatTime(new Date())}`;
+        section.setAttribute('aria-busy', 'false');
+      });
     })();
   </script>
 </body>
