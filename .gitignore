@@ -1,0 +1,19 @@
+# Exécutables et résultats Go
+/groupie-tracker
+*.test
+*.out
+coverage.*
+
+# Configuration locale et secrets
+.env
+.env.*
+!.env.example
+
+# Éditeurs et système
+.vscode/
+.idea/
+.DS_Store
+
+# Guides personnels conservés hors du dépôt
+/Guide_Algorithmique_Go_N1-N7.docx
+/Guide_Algorithmique_Go_N1-N7.pdf
