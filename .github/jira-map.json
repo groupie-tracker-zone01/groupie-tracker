@@ -17,10 +17,11 @@
     { "jira": "SCRUM-13", "primary": 11, "githubIssues": [11] },
     { "jira": "SCRUM-14", "primary": 12, "githubIssues": [12] },
     { "jira": "SCRUM-15", "primary": 10, "githubIssues": [10] },
-    { "jira": "SCRUM-16", "primary": 12, "githubIssues": [12] }
+    { "jira": "SCRUM-16", "primary": 12, "githubIssues": [12] },
+    { "jira": "SCRUM-17", "primary": 31, "githubIssues": [31] }
   ],
   "unmappedGitHubIssues": {
-    "2": "Docker ne possède pas encore d’équivalent Jira."
+    "2": "Docker reste volontairement hors Jira tant qu’aucun ticket Jira de livraison Docker n’est créé."
   },
   "sharedGitHubIssues": {
     "12": "Le même ticket GitHub pilote volontairement SCRUM-14 et SCRUM-16."
