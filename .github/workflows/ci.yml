@@ -38,7 +38,7 @@ jobs:
           node-version: 24
 
       - name: Tester la synchronisation Jira
-        run: node --test .github/scripts/sync-github-jira.test.mjs
+        run: node --test .github/scripts/sync-github-jira-v2.test.mjs
 
       - name: Vérifier le formatage
         shell: bash
