@@ -32,6 +32,14 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Installer Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Tester la synchronisation Jira
+        run: node --test .github/scripts/sync-github-jira.test.mjs
+
       - name: Vérifier le formatage
         shell: bash
         run: |
