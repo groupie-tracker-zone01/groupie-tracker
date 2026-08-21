@@ -53,7 +53,7 @@ jobs:
           node-version: 24
 
       - name: Tester les règles de synchronisation
-        run: node --test .github/scripts/sync-github-jira.test.mjs
+        run: node --test .github/scripts/sync-github-jira-v2.test.mjs
 
-      - name: Synchroniser les 16 tickets Jira
-        run: node .github/scripts/sync-github-jira.mjs
+      - name: Synchroniser les 17 tickets Jira
+        run: node .github/scripts/sync-github-jira-v2.mjs
