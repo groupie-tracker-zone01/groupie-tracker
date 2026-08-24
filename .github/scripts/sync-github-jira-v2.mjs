@@ -34,9 +34,11 @@ export function validateMapping(mapping){
 }
 
 export function jiraAuthHeader(baseUrl,email,token){
-  const u=new URL(baseUrl);
-  if(u.hostname==='api.atlassian.com') return `Bearer ${token}`;
-  if(!email) throw new Error('JIRA_EMAIL requis pour une URL Jira classique.');
+  // JIRA_API_TOKEN est un jeton d'API Atlassian, pas un access token OAuth.
+  // Les jetons d'API, y compris ceux avec scopes utilisés via api.atlassian.com,
+  // s'authentifient toujours en Basic avec la paire email:token.
+  new URL(baseUrl);
+  if(!email) throw new Error('JIRA_EMAIL requis pour authentifier le jeton API Jira.');
   return `Basic ${Buffer.from(`${email}:${token}`).toString('base64')}`;
 }
 
@@ -99,6 +101,19 @@ async function synchronizeEntry(entry,issues,pulls,jira,dryRun){
   return {jira:entry.jira,github:entry.githubIssues.map(n=>`#${n}`).join(', '),target:target.label,changed:labelsChanged||statusChanged};
 }
 
+export async function jiraPreflight(jira,projectKey){
+  try{
+    await jira('rest/api/3/myself');
+  }catch(e){
+    throw new Error(`Authentification Jira refusée. Vérifier JIRA_EMAIL, JIRA_API_TOKEN et leurs scopes. Détail : ${safe(e.message)}`);
+  }
+  try{
+    await jira(`rest/api/3/project/${projectKey}`);
+  }catch(e){
+    throw new Error(`Projet Jira ${projectKey} inaccessible. Vérifier le Cloud ID et le droit Browse Projects du compte qui a créé le jeton. Détail : ${safe(e.message)}`);
+  }
+}
+
 async function summary(lines){if(process.env.GITHUB_STEP_SUMMARY)await appendFile(process.env.GITHUB_STEP_SUMMARY,lines.join('\n')+'\n')}
 function env(name,optional=false){const v=process.env[name]?.trim();if(!v&&!optional)throw new Error(`Configuration manquante : ${name}`);return v??''}
 
@@ -108,6 +123,7 @@ async function run(){
   const state=await githubState(repository,ghToken),{issues,pulls}=lookups(state);
   const auth=jiraAuthHeader(base,email,jiraToken);
   const jira=(path,options={})=>request(new URL(path,base),{...options,headers:{accept:'application/json','content-type':'application/json',authorization:auth,...options.headers}});
+  await jiraPreflight(jira,mapping.jiraProject);
   const results=[],failures=[];
   for(const entry of mapping.mappings){try{results.push(await synchronizeEntry(entry,issues,pulls,jira,dryRun))}catch(e){failures.push({jira:entry.jira,message:safe(e.message)})}}
   const lines=[`## Synchronisation GitHub → Jira ${failures.length?'❌':'✅'}`,'',`- Mode : **${dryRun?'simulation':'écriture'}**`,`- Tickets attendus : **${mapping.mappings.length}**`,`- Tickets traités : **${results.length}**`,`- Échecs : **${failures.length}**`,'','| Jira | GitHub | État cible |','|---|---|---|',...results.map(r=>`| ${r.jira} | ${r.github} | ${r.target} |`)];
