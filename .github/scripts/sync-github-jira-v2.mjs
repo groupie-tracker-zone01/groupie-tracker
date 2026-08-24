@@ -13,7 +13,7 @@ const EXPECTED_COUNT=17;
 const RETRYABLE=new Set([429,500,502,503,504]);
 const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
 const uniq=(a)=>[...new Set(a)];
-const safe=(v)=>String(v).replace(/[\r\n|`]+/g,' ').replace(/\s+/g,' ').trim().slice(0,240);
+const safe=(v)=>String(v).replace(/[\r\n|`]+/g,' ').replace(/\s+/g,' ').trim().slice(0,300);
 const slug=(v)=>v.toLowerCase().replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'');
 
 export function validateMapping(mapping){
@@ -43,10 +43,18 @@ export function jiraAuthHeader(baseUrl,email,token){
 export function validateJiraBaseUrl(baseUrl){
   const u=new URL(baseUrl);
   const scoped=u.protocol==='https:'&&u.hostname==='api.atlassian.com'&&/^\/ex\/jira\/[0-9a-f-]+\/?$/i.test(u.pathname);
-  const classic=u.protocol==='https:'&&u.hostname.endsWith('.atlassian.net')&&u.pathname==='/';
-  if(u.username||u.password||u.search||u.hash||(!scoped&&!classic)) throw new Error('JIRA_BASE_URL invalide.');
+  const classic=u.protocol==='https:'&&u.hostname.endsWith('.atlassian.net')&&(u.pathname==='/'||u.pathname==='');
+  if(u.username||u.password||u.search||u.hash||(!scoped&&!classic)) throw new Error('URL Jira invalide.');
   if(!u.pathname.endsWith('/'))u.pathname+='/';
   return u;
+}
+
+export function buildJiraCandidates(baseUrl,siteUrl,email,token){
+  const raw=[];
+  if(siteUrl) raw.push({label:'site Jira direct · Basic',base:validateJiraBaseUrl(siteUrl)});
+  if(baseUrl) raw.push({label:new URL(baseUrl).hostname==='api.atlassian.com'?'gateway Atlassian · Bearer':'URL Jira configurée · Basic',base:validateJiraBaseUrl(baseUrl)});
+  const seen=new Set();
+  return raw.filter(c=>{const k=c.base.href;if(seen.has(k))return false;seen.add(k);return true}).map(c=>({...c,auth:jiraAuthHeader(c.base,email,token)}));
 }
 
 export function deriveJiraTarget(entry,issues,pulls){
@@ -71,7 +79,24 @@ async function request(url,options={},attempt=0){
   if(r.ok)return r.status===204?null:r.json();
   if(RETRYABLE.has(r.status)&&attempt<3){await sleep(500*2**attempt);return request(url,options,attempt+1)}
   let d='';try{d=safe(await r.text())}catch{}
-  throw new Error(`Requête HTTP ${r.status} vers ${new URL(url).pathname}${d?` : ${d}`:''}`);
+  throw new Error(`HTTP ${r.status} ${new URL(url).pathname}${d?` : ${d}`:''}`);
+}
+
+function jiraClient(candidate){
+  return (path,options={})=>request(new URL(path,candidate.base),{...options,headers:{accept:'application/json','content-type':'application/json',authorization:candidate.auth,...options.headers}});
+}
+
+async function preflightJira(candidates){
+  if(!candidates.length) throw new Error('Aucune URL Jira candidate configurée.');
+  const failures=[];
+  for(const candidate of candidates){
+    try{
+      const jira=jiraClient(candidate);
+      await jira('rest/api/3/issue/SCRUM-1?fields=id,key');
+      return {candidate,jira};
+    }catch(e){failures.push(`${candidate.label}: ${safe(e.message)}`)}
+  }
+  throw new Error(`Pré-test SCRUM-1 refusé. ${failures.join(' || ')}`);
 }
 
 async function githubState(repository,token){
@@ -103,14 +128,18 @@ async function summary(lines){if(process.env.GITHUB_STEP_SUMMARY)await appendFil
 function env(name,optional=false){const v=process.env[name]?.trim();if(!v&&!optional)throw new Error(`Configuration manquante : ${name}`);return v??''}
 
 async function run(){
-  const repository=env('GITHUB_REPOSITORY'), ghToken=env('GITHUB_TOKEN'), base=validateJiraBaseUrl(env('JIRA_BASE_URL')), jiraToken=env('JIRA_API_TOKEN'), email=env('JIRA_EMAIL',true), dryRun=process.env.DRY_RUN==='true';
+  const repository=env('GITHUB_REPOSITORY'),ghToken=env('GITHUB_TOKEN'),baseUrl=env('JIRA_BASE_URL',true),siteUrl=env('JIRA_SITE_URL',true),jiraToken=env('JIRA_API_TOKEN'),email=env('JIRA_EMAIL',true),dryRun=process.env.DRY_RUN==='true';
   const mapping=JSON.parse(await readFile(new URL('../jira-map.json',import.meta.url),'utf8')); validateMapping(mapping);
-  const state=await githubState(repository,ghToken),{issues,pulls}=lookups(state);
-  const auth=jiraAuthHeader(base,email,jiraToken);
-  const jira=(path,options={})=>request(new URL(path,base),{...options,headers:{accept:'application/json','content-type':'application/json',authorization:auth,...options.headers}});
+  const candidates=buildJiraCandidates(baseUrl,siteUrl,email,jiraToken);
+  let selected;
+  try{selected=await preflightJira(candidates)}catch(e){
+    const lines=['## Synchronisation GitHub → Jira ❌','',`- Pré-test : **SCRUM-1**`,`- Résultat : ${safe(e.message)}`,'- Tickets modifiés : **0**','',`Le workflow s’arrête avant de parcourir les ${mapping.mappings.length} tickets.`];
+    await summary(lines);console.log(lines.join('\n'));throw e;
+  }
+  const state=await githubState(repository,ghToken),{issues,pulls}=lookups(state),jira=selected.jira;
   const results=[],failures=[];
   for(const entry of mapping.mappings){try{results.push(await synchronizeEntry(entry,issues,pulls,jira,dryRun))}catch(e){failures.push({jira:entry.jira,message:safe(e.message)})}}
-  const lines=[`## Synchronisation GitHub → Jira ${failures.length?'❌':'✅'}`,'',`- Mode : **${dryRun?'simulation':'écriture'}**`,`- Tickets attendus : **${mapping.mappings.length}**`,`- Tickets traités : **${results.length}**`,`- Échecs : **${failures.length}**`,'','| Jira | GitHub | État cible |','|---|---|---|',...results.map(r=>`| ${r.jira} | ${r.github} | ${r.target} |`)];
+  const lines=[`## Synchronisation GitHub → Jira ${failures.length?'❌':'✅'}`,'',`- Mode Jira : **${selected.candidate.label}**`,`- Mode : **${dryRun?'simulation':'écriture'}**`,`- Pré-test SCRUM-1 : **OK**`,`- Tickets attendus : **${mapping.mappings.length}**`,`- Tickets traités : **${results.length}**`,`- Échecs : **${failures.length}**`,'','| Jira | GitHub | État cible |','|---|---|---|',...results.map(r=>`| ${r.jira} | ${r.github} | ${r.target} |`)];
   if(failures.length)lines.push('','### Échecs',...failures.map(f=>`- ${f.jira}: ${f.message}`));
   await summary(lines);console.log(lines.join('\n'));if(failures.length)throw new Error(`${failures.length} ticket(s) Jira n’ont pas pu être synchronisés.`);
 }
