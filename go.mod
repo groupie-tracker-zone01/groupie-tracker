@@ -1,3 +1,3 @@
-module github.com/groupie-tracker-zone01/groupie-tracker
+module api
 
 go 1.22
