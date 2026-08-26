@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "jiraProject": "SCRUM",
+  "mappings": [
+    { "jira": "SCRUM-1", "primary": 13, "githubIssues": [13] },
+    { "jira": "SCRUM-2", "primary": 14, "githubIssues": [14] },
+    { "jira": "SCRUM-3", "primary": 15, "githubIssues": [15] },
+    { "jira": "SCRUM-4", "primary": 16, "githubIssues": [16] },
+    { "jira": "SCRUM-5", "primary": 1, "githubIssues": [1] },
+    { "jira": "SCRUM-6", "primary": 4, "githubIssues": [4] },
+    { "jira": "SCRUM-7", "primary": 5, "githubIssues": [5] },
+    { "jira": "SCRUM-8", "primary": 8, "githubIssues": [8] },
+    { "jira": "SCRUM-9", "primary": 6, "githubIssues": [6, 20, 21] },
+    { "jira": "SCRUM-10", "primary": 9, "githubIssues": [9] },
+    { "jira": "SCRUM-11", "primary": 7, "githubIssues": [7] },
+    { "jira": "SCRUM-12", "primary": 17, "githubIssues": [17] },
+    { "jira": "SCRUM-13", "primary": 11, "githubIssues": [11] },
+    { "jira": "SCRUM-14", "primary": 12, "githubIssues": [12] },
+    { "jira": "SCRUM-15", "primary": 10, "githubIssues": [10] },
+    { "jira": "SCRUM-16", "primary": 12, "githubIssues": [12] },
+    { "jira": "SCRUM-17", "primary": 31, "githubIssues": [31] }
+  ],
+  "unmappedGitHubIssues": {
+    "2": "Docker reste volontairement hors Jira tant qu’aucun ticket Jira de livraison Docker n’est créé."
+  },
+  "sharedGitHubIssues": {
+    "12": "Le même ticket GitHub pilote volontairement SCRUM-14 et SCRUM-16."
+  },
+  "excludedGitHubIssues": {
+    "18": "Ticket de test hors du Project.",
+    "19": "Sous-ticket mal rattaché à #5, à clarifier avant synchronisation."
+  }
+}

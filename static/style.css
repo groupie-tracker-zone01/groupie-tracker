@@ -1,0 +1,92 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Metal Mania", system-ui;
+}
+
+body {
+    background-color: rgb(255, 255, 255);
+    min-height: 100vh;
+}
+
+header {
+    top: 0;
+    position: sticky;
+    display: inline-block;
+    width: 100%;
+    height: auto;
+    background-color: rgb(6, 6, 6);
+    box-shadow: 0 0 5px hsl(46, 100%, 38%);
+    z-index: 1000;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 5%;
+    text-decoration: none;
+    font-size: 1rem;
+    color: hsl(46, 100%, 38%);
+}
+
+.login {
+    transition: 0.3s;
+    text-decoration: none;
+    color: hsl(46, 100%, 38%);
+    padding-left: 35vh;
+}
+
+.login:hover {
+    color: #b50202;
+    border-radius: 5px;
+}
+
+/* ===== Animation - Title ===== */
+@keyframes MetaRock {
+    0%   { 
+        opacity: 0%; 
+        transform: translateX(-100px) scale(0.5) rotate(-15deg);
+    }
+    25%  { 
+        opacity: 25%; 
+        transform: translateX(-50px) scale(0.7) rotate(-10deg);
+    }
+    50%  { 
+        opacity: 50%; 
+        transform: translateX(20px) scale(1.1) rotate(5deg);
+    }
+    75%  { 
+        opacity: 75%; 
+        transform: translateX(-10px) scale(0.95) rotate(-3deg);
+    }
+    100% { 
+        opacity: 100%; 
+        transform: translateX(0px) scale(1) rotate(0deg);
+    }
+}
+/* ===== Title's animation ===== */
+
+.title {
+    font-family: "Metal Mania", system-ui;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 8.2rem;
+    text-shadow: 0 0 10px hsl(46, 100%, 38%), 0 0 10px hsl(46, 100%, 38%), 0 0 10px hsl(46, 100%, 38%);
+    text-align: center;
+    width: 100%;
+    display: block; 
+    margin: 0 auto; 
+    padding: 0 20px;
+    
+    /* animation */
+    animation-name: MetaRock;
+    animation-duration: 2s;
+    animation-fill-mode: forwards;
+}
+
+.logo {
+    position: relative;
+    display: inline;
+}

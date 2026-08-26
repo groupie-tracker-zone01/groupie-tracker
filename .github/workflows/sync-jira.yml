@@ -1,0 +1,60 @@
+name: Synchronisation Jira
+
+on:
+  issues:
+    types:
+      - assigned
+      - unassigned
+      - closed
+      - reopened
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+      timezone: "Europe/Paris"
+    - cron: "0 8 * * *"
+      timezone: "Europe/Paris"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Simuler sans modifier Jira
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: github-to-jira
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: GitHub vers Jira
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: jira-sync
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      JIRA_BASE_URL: ${{ vars.JIRA_BASE_URL }}
+      JIRA_SITE_URL: https://maugerlonguemareleandre.atlassian.net/
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v7
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Tester les règles de synchronisation
+        run: node --test .github/scripts/sync-github-jira-v2.test.mjs
+
+      - name: Pré-tester Jira puis synchroniser les 17 tickets
+        run: node .github/scripts/sync-github-jira-v2.mjs
