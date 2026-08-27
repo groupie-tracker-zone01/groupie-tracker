@@ -14,7 +14,7 @@ body {
 }
 
 body {
-    min-height: 100dvh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     font-family: "Metal Mania", system-ui;
@@ -201,7 +201,8 @@ main {
     }
     
     .carousel-item {
-        height: 85vh;
+        /* height: 87vh; */
+        height: 100%;
     }
     
     .carousel-btn {

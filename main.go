@@ -30,7 +30,7 @@ func main() {
 			Title: "Home - MetaRock",
 		}
 
-		err := templates.ExecuteTemplate(w, "home.html", data)
+		err := templates.ExecuteTemplate(w, "home", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Println(err)

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let index = 0;
     const totalItems = items.length;
-    let autoPlayInterval; // Variável para guardar o intervalo
+    let autoPlayInterval;
 
     function updateCarousel() {
         inner.style.transition = 'transform 0.5s ease-in-out';
@@ -23,22 +23,20 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCarousel();
     }
 
-    // Adiciona eventos
+    // Events
     nextBtn.addEventListener('click', () => {
         nextSlide();
-        resetAutoPlay(); // Reinicia o timer quando o usuário clica
+        resetAutoPlay();
     });
 
     prevBtn.addEventListener('click', () => {
         prevSlide();
-        resetAutoPlay(); // Reinicia o timer quando o usuário clica
+        resetAutoPlay();
     });
 
-    // ==========================================
-    // LÓGICA DO AUTO-PLAY (Troca automática)
-    // ==========================================
+    
     function startAutoPlay() {
-        autoPlayInterval = setInterval(nextSlide, 3000); // Troca a cada 3 segundos (3000ms)
+        autoPlayInterval = setInterval(nextSlide, 3000);
     }
 
     function stopAutoPlay() {
@@ -50,14 +48,14 @@ document.addEventListener('DOMContentLoaded', function() {
         startAutoPlay();
     }
 
-    // Pausa quando o mouse está em cima do carrossel
+    // Pause
     const carousel = document.querySelector('.carousel');
     if (carousel) {
         carousel.addEventListener('mouseenter', stopAutoPlay);
         carousel.addEventListener('mouseleave', startAutoPlay);
     }
 
-    // Inicializa o carrossel
+    // Starts carousel
     updateCarousel();
-    startAutoPlay(); // Começa a troca automática assim que a página carrega
+    startAutoPlay();
 });

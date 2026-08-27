@@ -1,4 +1,4 @@
-{{define "home.html"}}
+{{define "home"}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,7 +35,7 @@
 
             <form action="/" method="GET" class="search-form-overlay">
                 <section class="search-bar">
-                    <input type="text" name="search" class="search" placeholder="Type an artist...">
+                    <input type="text" name="search" class="search" placeholder="Type an artist..." maxlength="30" pattern="[A-Za-z0-9]+" title="Just letters, numbers and spaces are allowed">
                     <button type="submit" class="search-btn">Search</button>
                 </section>
             </form>
