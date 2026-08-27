@@ -1,0 +1,61 @@
+name: CI Go
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - "fix/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Qualité Go
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v7
+
+      - name: Installer Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Tester la synchronisation Jira
+        run: node --test .github/scripts/sync-github-jira-v2.test.mjs
+
+      - name: Vérifier le formatage
+        shell: bash
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "Ces fichiers doivent être formatés avec gofmt :"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Analyser le code
+        run: go vet ./...
+
+      - name: Exécuter les tests
+        run: go test -race ./...
+
+      - name: Compiler
+        run: go build ./...
