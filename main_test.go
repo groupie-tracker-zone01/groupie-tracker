@@ -50,4 +50,5 @@ func TestServerPort(t *testing.T) {
 			t.Fatalf("port reçu %q, attendu %q", port, configuredPort)
 		}
 	})
+	// test
 }
