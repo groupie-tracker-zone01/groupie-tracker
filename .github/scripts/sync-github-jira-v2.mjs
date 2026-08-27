@@ -34,9 +34,8 @@ export function validateMapping(mapping){
 }
 
 export function jiraAuthHeader(baseUrl,email,token){
-  const u=new URL(baseUrl);
-  if(u.hostname==='api.atlassian.com') return `Bearer ${token}`;
-  if(!email) throw new Error('JIRA_EMAIL requis pour une URL Jira classique.');
+  new URL(baseUrl);
+  if(!email) throw new Error('JIRA_EMAIL requis pour authentifier le jeton API Jira.');
   return `Basic ${Buffer.from(`${email}:${token}`).toString('base64')}`;
 }
 
@@ -52,7 +51,7 @@ export function validateJiraBaseUrl(baseUrl){
 export function buildJiraCandidates(baseUrl,siteUrl,email,token){
   const raw=[];
   if(siteUrl) raw.push({label:'site Jira direct · Basic',base:validateJiraBaseUrl(siteUrl)});
-  if(baseUrl) raw.push({label:new URL(baseUrl).hostname==='api.atlassian.com'?'gateway Atlassian · Bearer':'URL Jira configurée · Basic',base:validateJiraBaseUrl(baseUrl)});
+  if(baseUrl) raw.push({label:new URL(baseUrl).hostname==='api.atlassian.com'?'gateway Atlassian · Basic':'URL Jira configurée · Basic',base:validateJiraBaseUrl(baseUrl)});
   const seen=new Set();
   return raw.filter(c=>{const k=c.base.href;if(seen.has(k))return false;seen.add(k);return true}).map(c=>({...c,auth:jiraAuthHeader(c.base,email,token)}));
 }
@@ -124,11 +123,24 @@ async function synchronizeEntry(entry,issues,pulls,jira,dryRun){
   return {jira:entry.jira,github:entry.githubIssues.map(n=>`#${n}`).join(', '),target:target.label,changed:labelsChanged||statusChanged};
 }
 
+export async function jiraPreflight(jira,projectKey){
+  try{
+    await jira('rest/api/3/myself');
+  }catch(e){
+    throw new Error(`Authentification Jira refusée. Vérifier JIRA_EMAIL, JIRA_API_TOKEN et leurs scopes. Détail : ${safe(e.message)}`);
+  }
+  try{
+    await jira(`rest/api/3/project/${projectKey}`);
+  }catch(e){
+    throw new Error(`Projet Jira ${projectKey} inaccessible. Vérifier le Cloud ID et le droit Browse Projects du compte qui a créé le jeton. Détail : ${safe(e.message)}`);
+  }
+}
+
 async function summary(lines){if(process.env.GITHUB_STEP_SUMMARY)await appendFile(process.env.GITHUB_STEP_SUMMARY,lines.join('\n')+'\n')}
 function env(name,optional=false){const v=process.env[name]?.trim();if(!v&&!optional)throw new Error(`Configuration manquante : ${name}`);return v??''}
 
 async function run(){
-  const repository=env('GITHUB_REPOSITORY'),ghToken=env('GITHUB_TOKEN'),baseUrl=env('JIRA_BASE_URL',true),siteUrl=env('JIRA_SITE_URL',true),jiraToken=env('JIRA_API_TOKEN'),email=env('JIRA_EMAIL',true),dryRun=process.env.DRY_RUN==='true';
+  const repository=env('GITHUB_REPOSITORY'),ghToken=env('GITHUB_TOKEN'),baseUrl=env('JIRA_BASE_URL',true),siteUrl=env('JIRA_SITE_URL',true),jiraToken=env('JIRA_API_TOKEN'),email=env('JIRA_EMAIL'),dryRun=process.env.DRY_RUN==='true';
   const mapping=JSON.parse(await readFile(new URL('../jira-map.json',import.meta.url),'utf8')); validateMapping(mapping);
   const candidates=buildJiraCandidates(baseUrl,siteUrl,email,jiraToken);
   let selected;
@@ -136,6 +148,7 @@ async function run(){
     const lines=['## Synchronisation GitHub → Jira ❌','',`- Pré-test : **SCRUM-1**`,`- Résultat : ${safe(e.message)}`,'- Tickets modifiés : **0**','',`Le workflow s’arrête avant de parcourir les ${mapping.mappings.length} tickets.`];
     await summary(lines);console.log(lines.join('\n'));throw e;
   }
+  await jiraPreflight(selected.jira,mapping.jiraProject);
   const state=await githubState(repository,ghToken),{issues,pulls}=lookups(state),jira=selected.jira;
   const results=[],failures=[];
   for(const entry of mapping.mappings){try{results.push(await synchronizeEntry(entry,issues,pulls,jira,dryRun))}catch(e){failures.push({jira:entry.jira,message:safe(e.message)})}}
