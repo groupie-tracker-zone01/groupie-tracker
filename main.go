@@ -20,30 +20,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	templates := template.Must(template.ParseFiles(
 		filepath.Join(dir, "templates", "pages", "home.html"),
 		filepath.Join(dir, "templates", "base", "header.html"),
 		filepath.Join(dir, "templates", "base", "footer.html"),
 	))
-
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		data := struct {
 			Title string
 		}{
 			Title: "Home - MetaRock",
 		}
-
 		err := templates.ExecuteTemplate(w, "home", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Println(err)
 		}
 	})
-
 	fmt.Println("Server running at http://localhost:" + serverPort())
 	connection := http.ListenAndServe(":8080", routes())
 	if connection != nil {
