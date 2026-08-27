@@ -1,13 +1,13 @@
 package main
 
 import (
-  "html/template"
 	"api/api"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
-  "path/filepath"
+	"path/filepath"
 )
 
 const (
@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-  dir, err := os.Getwd()
+	dir, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func main() {
 			log.Println(err)
 		}
 	})
-  
+
 	fmt.Println("Server running at http://localhost:" + serverPort())
 	connection := http.ListenAndServe(":8080", routes())
 	if connection != nil {
