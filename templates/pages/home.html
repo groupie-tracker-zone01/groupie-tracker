@@ -1,0 +1,52 @@
+{{define "home"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/pages/home.css?v=4">
+    <link rel="stylesheet" href="/static/css/components/header.css?v=4">
+    <link rel="stylesheet" href="/static/css/components/footer.css?v=4">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- Header -->
+    {{template "header" .}}
+
+    <main>
+        <section class="hero-container">
+            <!-- Carousel -->
+            <div class="carousel">
+                <div class="carousel-inner" id="carousel-inner">
+                    <img src="/static/images/logo.png" class="carousel-item active" alt="photo1">
+                    <img src="/static/images/rock.png" class="carousel-item" alt="photo2">
+                    <img src="/static/images/roll.png" class="carousel-item" alt="photo3">
+                    <img src="/static/images/guitar.png" class="carousel-item" alt="photo4">
+                    <img src="/static/images/caveiras.png" class="carousel-item" alt="photo5">
+                </div>
+                <button class="carousel-btn prev" id="prev-btn"> ❮ </button>
+                <button class="carousel-btn next" id="next-btn"> ❯ </button>
+            </div> 
+
+            <form action="/" method="GET" class="search-form-overlay">
+                <section class="search-bar">
+                    <input type="text" name="search" class="search" placeholder="Type an artist..." maxlength="30" pattern="[A-Za-z0-9]+" title="Just letters, numbers and spaces are allowed">
+                    <button type="submit" class="search-btn">Search</button>
+                </section>
+            </form>
+        </section> 
+    </main>
+
+    <!-- Footer -->
+    {{template "footer" .}}
+
+    <script src="/static/JS/home.js"></script>
+</body>
+
+</html>
+{{end}}

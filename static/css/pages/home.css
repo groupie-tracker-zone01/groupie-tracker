@@ -1,0 +1,378 @@
+@import url('./components/header.css');
+@import url('./components/footer.css');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Metal Mania", system-ui;
+    background-color: #ffffff;
+}
+
+main {
+    flex: 1;
+    width: 100%;
+    padding: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+}
+
+/* CAROUSEL */
+.hero-container {
+    display: grid;
+    place-items: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 5vh;
+    overflow: hidden;
+}
+
+.carousel {
+    position: absolute; /* ← O carousel precisa ser absolute para ficar atrás */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.carousel-inner {
+    min-width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+    width: 100%;
+    height: 84.1vh;
+    object-fit: cover;
+    position: relative;
+    flex: 0 0 100%;
+}
+
+.carousel-item.active {
+    z-index: auto;
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.348);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
+    z-index: 10;
+    transition: background 0.3s;
+}
+
+.carousel-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.prev {
+    left: 10px;
+}
+
+.next {
+    right: 10px;
+}
+
+/* SEARCH BAR */
+.search-form-overlay {
+    grid-area: 1 / 1;
+    z-index: 10;
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    opacity: 80%;
+}
+
+.search-bar {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: min(90%, 700px);
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.search {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: clamp(0.7rem, 1.5vw, 1.1rem);
+    color: #333;
+    padding: clamp(0.4rem, 1.5vh, 0.8rem) clamp(0.6rem, 2vw, 1.5rem);
+}
+
+.search::placeholder {
+    color: #888;
+    font-size: clamp(0.6rem, 1.2vw, 1rem);
+}
+
+.search-bar .search-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(0.65rem, 1.5vw, 1.2rem);
+    padding: clamp(0.4rem, 1.5vh, 0.8rem) clamp(0.8rem, 2.5vw, 1.8rem);
+    white-space: nowrap;
+    background-color: hsl(46, 100%, 38%);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    color: rgb(0, 0, 0);
+    font-family: inherit;
+    flex-shrink: 0;
+    height: auto;
+    min-height: 100%;
+    border-radius: 0 50px 50px 0;
+    min-width: fit-content;
+}
+
+.search-bar .search-btn:hover {
+    transform: scale(1.02);
+    color: white;
+}
+
+.search-bar .search-btn:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 1200px) {
+    .search-bar {
+        width: min(85%, 650px);
+    }
+}
+
+@media (max-width: 992px) {
+    .search-form-overlay {
+        padding: 0.8rem;
+    }
+    
+    .search-bar {
+        width: min(80%, 600px);
+        border-radius: 45px;
+    }
+    
+    .search {
+        padding: clamp(0.35rem, 1.2vh, 0.7rem) clamp(0.5rem, 1.5vw, 1.2rem);
+    }
+    
+    .search-bar .search-btn {
+        padding: clamp(0.35rem, 1.2vh, 0.7rem) clamp(0.6rem, 2vw, 1.5rem);
+        border-radius: 0 45px 45px 0;
+        font-size: clamp(0.6rem, 1.3vw, 1rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-container {
+        min-height: 2vh;
+    }
+    
+    .carousel-item {
+        /* height: 87vh; */
+        height: 100%;
+    }
+    
+    .carousel-btn {
+        width: 5%;
+        background: rgba(0, 0, 0, 0.2);
+        opacity: 30%;
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    
+    .carousel-btn:hover {
+        opacity: 60%;
+    }
+    
+    .search-form-overlay {
+        padding: 0.6rem;
+    }
+    
+    .search-bar {
+        width: min(90%, 500px);
+        border-radius: 40px;
+    }
+    
+    .search {
+        padding: clamp(0.3rem, 1vh, 0.6rem) clamp(0.4rem, 1.2vw, 1rem);
+        font-size: clamp(0.6rem, 1.2vw, 0.85rem);
+    }
+    
+    .search::placeholder {
+        font-size: clamp(0.5rem, 1vw, 0.75rem);
+    }
+    
+    .search-bar .search-btn {
+        padding: clamp(0.3rem, 1vh, 0.6rem) clamp(0.5rem, 1.5vw, 1.2rem);
+        border-radius: 0 40px 40px 0;
+        font-size: clamp(0.55rem, 1.2vw, 0.85rem);
+        min-width: clamp(60px, 12vw, 80px);
+    }
+}
+
+@media (max-width: 576px) {
+    .search-form-overlay {
+        padding: 0.5rem;
+    }
+    
+    .search-bar {
+        width: min(95%, 500px);
+        border-radius: 35px;
+    }
+    
+    .search {
+        padding: clamp(0.25rem, 0.8vh, 0.5rem) clamp(0.3rem, 1vw, 0.8rem);
+        font-size: clamp(0.5rem, 1vw, 0.75rem);
+    }
+    
+    .search::placeholder {
+        font-size: clamp(0.45rem, 0.8vw, 0.65rem);
+    }
+    
+    .search-bar .search-btn {
+        padding: clamp(0.25rem, 0.8vh, 0.5rem) clamp(0.4rem, 1.2vw, 1rem);
+        border-radius: 0 35px 35px 0;
+        font-size: clamp(0.5rem, 1vw, 0.75rem);
+        min-width: clamp(50px, 10vw, 70px);
+    }
+}
+
+@media (max-width: 400px) {
+    .search-form-overlay {
+        padding: 0.3rem;
+    }
+    
+    .search-bar {
+        width: min(98%, 350px);
+        border-radius: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .search {
+        padding: clamp(0.2rem, 0.6vh, 0.4rem) clamp(0.2rem, 0.8vw, 0.6rem);
+        font-size: clamp(0.45rem, 0.9vw, 0.65rem);
+    }
+    
+    .search::placeholder {
+        font-size: clamp(0.4rem, 0.7vw, 0.55rem);
+    }
+    
+    .search-bar .search-btn {
+        padding: clamp(0.2rem, 0.6vh, 0.4rem) clamp(0.3rem, 0.8vw, 0.8rem);
+        border-radius: 0 30px 30px 0;
+        font-size: clamp(0.45rem, 0.9vw, 0.65rem);
+        min-width: clamp(40px, 8vw, 55px);
+    }
+}
+
+@media (max-width: 320px) {
+    .search-form-overlay {
+        padding: 0.2rem;
+    }
+    
+    .search-bar {
+        width: 99%;
+        border-radius: 25px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    }
+    
+    .search {
+        padding: 0.15rem 0.2rem 0.15rem 0.4rem;
+        font-size: 0.5rem;
+    }
+    
+    .search::placeholder {
+        font-size: 0.45rem;
+    }
+    
+    .search-bar .search-btn {
+        padding: 0.15rem 0.4rem;
+        border-radius: 0 25px 25px 0;
+        font-size: 0.5rem;
+        min-width: 35px;
+    }
+}
+
+/* TELAS MUITO GRANDES */
+@media (min-width: 1600px) {
+    .search-bar {
+        max-width: 800px;
+        border-radius: 60px;
+    }
+    
+    .search {
+        font-size: 1.3rem;
+        padding: 1rem 2rem;
+    }
+    
+    .search::placeholder {
+        font-size: 1.2rem;
+    }
+    
+    .search-bar .search-btn {
+        font-size: 1.4rem;
+        padding: 1rem 2.2rem;
+        border-radius: 0 60px 60px 0;
+    }
+}
+
+/* TELAS EM PAISAGEM (LANDSCAPE) */
+@media (max-height: 500px) and (orientation: landscape) {
+    .search-form-overlay {
+        padding: 0.3rem;
+    }
+    
+    .search-bar {
+        border-radius: 30px;
+        width: min(70%, 600px);
+    }
+    
+    .search {
+        padding: 0.2rem 0.8rem;
+        font-size: 0.7rem;
+    }
+    
+    .search::placeholder {
+        font-size: 0.6rem;
+    }
+    
+    .search-bar .search-btn {
+        padding: 0.2rem 0.8rem;
+        border-radius: 0 30px 30px 0;
+        font-size: 0.7rem;
+        min-width: 60px;
+    }
+}

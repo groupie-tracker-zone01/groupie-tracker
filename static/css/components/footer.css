@@ -1,0 +1,18 @@
+
+/* Footer */
+footer.footer {
+    margin-top: auto;
+    width: 100%;
+    background-color: rgb(0, 0, 0);
+    padding: 0.5rem;
+    text-align: center;
+    color: hsl(46, 100%, 38%);
+    box-sizing: border-box; 
+    flex-shrink: 0; 
+}
+
+footer.footer p {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1;
+}
