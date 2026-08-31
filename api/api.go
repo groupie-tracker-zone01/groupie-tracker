@@ -6,13 +6,6 @@ import (
 	"net/http"
 )
 
-type API struct {
-	Artists   string `json:"artists"`
-	Locations string `json:"locations"`
-	Dates     string `json:"dates"`
-	Relations string `json:"relation"`
-}
-
 type Artist struct {
 	Id           int      `json:"id"`
 	Image        string   `json:"image"`
@@ -51,6 +44,32 @@ type Relation struct {
 	DatesLocations map[string][]string `json:"datesLocations"`
 }
 
+type AppData struct {
+	Artists   []Artist
+	Locations LocationWrapper
+	Dates     DateWrapper
+	Relations RelationWrapper
+}
+
+const baseURL = "https://groupietrackers.herokuapp.com/api"
+
+func LoadData() (*AppData, error) {
+	data := &AppData{}
+	if err := fetchJSON(baseURL+"/artists", &data.Artists); err != nil {
+		return nil, fmt.Errorf("chargement artists: %w", err)
+	}
+	if err := fetchJSON(baseURL+"/locations", &data.Locations); err != nil {
+		return nil, fmt.Errorf("chargement locations: %w", err)
+	}
+	if err := fetchJSON(baseURL+"/dates", &data.Dates); err != nil {
+		return nil, fmt.Errorf("chargement dates: %w", err)
+	}
+	if err := fetchJSON(baseURL+"/relation", &data.Relations); err != nil {
+		return nil, fmt.Errorf("chargement relation: %w", err)
+	}
+	return data, nil
+}
+
 func fetchJSON(url string, target any) error {
 	response, err := http.Get(url)
 	if err != nil {
@@ -63,37 +82,32 @@ func fetchJSON(url string, target any) error {
 	return json.NewDecoder(response.Body).Decode(target)
 }
 
-// Gère l'affichage des données sur la page lorsque le suffixe de l'URL est /api.
-func ApiHandler(w http.ResponseWriter, r *http.Request) {
-	var api API
-	res := fetchJSON("https://groupietrackers.herokuapp.com/api", &api)
-	if res != nil {
-		http.Error(w, res.Error(), http.StatusInternalServerError)
-		return
+func ArtistsHandler(data *AppData) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(data.Artists); err != nil {
+			http.Error(w, "erreur de réponse", http.StatusInternalServerError)
+		}
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(api)
 }
 
-// Gère l'affichage des données sur la page selon l'URL reçu.
-func DataHandler(w http.ResponseWriter, r *http.Request) {
-	var data any
-	url := "https://groupietrackers.herokuapp.com/api" + r.URL.String()
-	switch r.URL.String() {
-	case "/artists":
-		data = &[]Artist{}
-	case "/locations":
-		data = LocationWrapper{}
-	case "/dates":
-		data = DateWrapper{}
-	case "/relation":
-		data = RelationWrapper{}
+func LocationsHandler(data *AppData) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(data.Locations)
 	}
-	res := fetchJSON(url, &data)
-	if res != nil {
-		http.Error(w, res.Error(), http.StatusInternalServerError)
-		return
+}
+
+func DatesHandler(data *AppData) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(data.Dates)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+}
+
+func RelationsHandler(data *AppData) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(data.Relations)
+	}
 }
