@@ -1,6 +1,7 @@
 {{define "artists"}}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,12 +13,32 @@
     <link rel="stylesheet" href="/static/css/components/footer.css?v=4">
     <title>Document</title>
 </head>
+
 <body>
     <!-- Header -->
     {{template "header" .}}
 
-
-
+    <section class="card">
+        <div class="card-artist">
+            <h2 class="title-card">Informations</h2>
+            <div class="artist-content">
+                <div class="info-card">
+                    <img src="/static/images/guitar.png" alt="artist-img">
+                    <h4>Nirvana</h4>
+                </div>
+                <div class="info-artist">
+                    <h4>Description</h4>
+                    <p>The best band in the world</p>
+                    <h4>Locations</h4>
+                    <p>Paradise and at Foo Fights</p>
+                    <h4>Show's Dates</h4>
+                    <p>Never again without Kurt</p>
+                    <h4>Relations</h4>
+                    <p>Kurt is Ash's rival after say misogyny against his Kurt's wife</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
 
 
@@ -25,6 +46,7 @@
     <!-- Footer -->
     {{template "footer" .}}
 </body>
+
 </html>
 
 

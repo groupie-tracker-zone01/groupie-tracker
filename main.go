@@ -25,6 +25,7 @@ func main() {
 	// --- Templates config
 	templates := template.Must(template.ParseFiles(
 		filepath.Join(dir, "templates", "pages", "home.html"),
+		filepath.Join(dir, "templates", "pages", "artists.html"),
 		filepath.Join(dir, "templates", "base", "header.html"),
 		filepath.Join(dir, "templates", "base", "footer.html"),
 	))
@@ -68,7 +69,7 @@ func routes(templates *template.Template) http.Handler {
 		}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		err := templates.ExecuteTemplate(w, "home", data)
+		err := templates.ExecuteTemplate(w, "artists", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Println(err)
