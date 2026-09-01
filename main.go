@@ -47,6 +47,7 @@ func serverPort() string {
 
 func routes(data *api.AppData) http.Handler {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/", homeHandler)
 	mux.HandleFunc("/artists", api.ArtistsHandler(data))
 	mux.HandleFunc("/locations", api.LocationsHandler(data))
 	mux.HandleFunc("/dates", api.DatesHandler(data))
