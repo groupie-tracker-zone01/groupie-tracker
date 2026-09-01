@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/api"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +12,7 @@ func TestHome(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	routes().ServeHTTP(response, request)
+	routes(&api.AppData{}).ServeHTTP(response, request)
 
 	if response.Code != http.StatusOK {
 		t.Fatalf("statut reçu %d, attendu %d", response.Code, http.StatusOK)
@@ -26,7 +27,7 @@ func TestNotFound(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/inconnue", nil)
 	response := httptest.NewRecorder()
 
-	routes().ServeHTTP(response, request)
+	routes(&api.AppData{}).ServeHTTP(response, request)
 
 	if response.Code != http.StatusNotFound {
 		t.Fatalf("statut reçu %d, attendu %d", response.Code, http.StatusNotFound)

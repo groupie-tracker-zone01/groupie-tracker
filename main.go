@@ -2,12 +2,11 @@ package main
 
 import (
 	"api/api"
+	"encoding/json"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 )
 
 const (
@@ -15,34 +14,27 @@ const (
 	portEnv     = "PORT"
 )
 
+const baseURL = "https://groupietrackers.herokuapp.com/api"
+
+func fetchJSON(url string, target any) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("API: statut inattendu %s", resp.Status)
+	}
+	return json.NewDecoder(resp.Body).Decode(target)
+}
+
 func main() {
-	dir, err := os.Getwd()
+	data, err := api.LoadData()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	templates := template.Must(template.ParseFiles(
-		filepath.Join(dir, "templates", "pages", "home.html"),
-		filepath.Join(dir, "templates", "base", "header.html"),
-		filepath.Join(dir, "templates", "base", "footer.html"),
-	))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		data := struct {
-			Title string
-		}{
-			Title: "Home - MetaRock",
-		}
-		err := templates.ExecuteTemplate(w, "home", data)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Println(err)
-		}
-	})
-	fmt.Println("Server running at http://localhost:" + serverPort())
-	connection := http.ListenAndServe(":8080", routes())
-	if connection != nil {
-		log.Fatalf("démarrage du serveur: %v", connection)
+	if err := http.ListenAndServe(":8080", routes(data)); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -53,14 +45,13 @@ func serverPort() string {
 	return defaultPort
 }
 
-func routes() http.Handler {
+func routes(data *api.AppData) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", homeHandler)
-	mux.HandleFunc("/api", api.ApiHandler)
-	mux.HandleFunc("/artists", api.DataHandler)
-	mux.HandleFunc("/locations", api.DataHandler)
-	mux.HandleFunc("/dates", api.DataHandler)
-	mux.HandleFunc("/relation", api.DataHandler)
+	mux.HandleFunc("/artists", api.ArtistsHandler(data))
+	mux.HandleFunc("/locations", api.LocationsHandler(data))
+	mux.HandleFunc("/dates", api.DatesHandler(data))
+	mux.HandleFunc("/relations", api.RelationsHandler(data))
 	return mux
 }
 
