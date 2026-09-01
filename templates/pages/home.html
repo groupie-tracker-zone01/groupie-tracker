@@ -31,7 +31,7 @@
                 </div>
                 <button class="carousel-btn prev" id="prev-btn"> ❮ </button>
                 <button class="carousel-btn next" id="next-btn"> ❯ </button>
-            </div> 
+            </div>
 
             <form action="/" method="GET" class="search-form-overlay">
                 <section class="search-bar">
@@ -39,7 +39,17 @@
                     <button type="submit" class="search-btn">Search</button>
                 </section>
             </form>
-        </section> 
+        </section>
+
+        <!-- Minimum artist display required by the MVP -->
+        <section>
+            {{range .Artists}}
+            <article>
+                <img src="{{.Image}}" alt="{{.Name}}">
+                <h2>{{.Name}}</h2>
+            </article>
+            {{end}}
+        </section>
     </main>
 
     <!-- Footer -->
