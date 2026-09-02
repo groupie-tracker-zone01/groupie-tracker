@@ -35,7 +35,8 @@
 
             <form action="/" method="GET" class="search-form-overlay">
                 <section class="search-bar">
-                    <input type="text" name="search" class="search" placeholder="Type an artist..." maxlength="30" pattern="[A-Za-z0-9]+" title="Just letters, numbers and spaces are allowed">
+                    <input type="text" name="search" class="search" placeholder="Type an artist..." maxlength="30" pattern="[A-Za-z0-9]+" title="Just letters, numbers and spaces are allowed" autocomplete="off">
+                    <div id="suggestions-box"></div>
                     <button type="submit" class="search-btn">Search</button>
                 </section>
             </form>

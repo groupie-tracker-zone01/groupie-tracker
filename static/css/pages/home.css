@@ -126,12 +126,28 @@ main {
 .search {
     flex: 1;
     min-width: 0;
-    border: none;
     outline: none;
     background: transparent;
     font-size: clamp(0.7rem, 1.5vw, 1.1rem);
     color: #333;
+    border-radius: 50px 5px 0 50px;
+    border: 2px solid black;
     padding: clamp(0.4rem, 1.5vh, 0.8rem) clamp(0.6rem, 2vw, 1.5rem);
+}
+
+#suggestions-box {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
 }
 
 .search::placeholder {
@@ -157,6 +173,8 @@ main {
     min-height: 100%;
     border-radius: 0 50px 50px 0;
     min-width: fit-content;
+    border: 1px solid black;
+    border-left: none;
 }
 
 .search-bar .search-btn:hover {
@@ -167,6 +185,7 @@ main {
 .search-bar .search-btn:active {
     transform: scale(0.95);
 }
+
 
 @media (max-width: 1200px) {
     .search-bar {

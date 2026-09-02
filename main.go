@@ -15,6 +15,12 @@ const (
 	portEnv     = "PORT"
 )
 
+var bands = []string{
+	"band",
+	"nirvana",
+	"acdc",
+}
+
 func main() {
 	// --- Actual directory
 	dir, err := os.Getwd()
@@ -26,6 +32,7 @@ func main() {
 	templates := template.Must(template.ParseFiles(
 		filepath.Join(dir, "templates", "pages", "home.html"),
 		filepath.Join(dir, "templates", "pages", "artists.html"),
+		filepath.Join(dir, "templates", "pages", "error404.html"),
 		filepath.Join(dir, "templates", "base", "header.html"),
 		filepath.Join(dir, "templates", "base", "footer.html"),
 	))
@@ -69,7 +76,7 @@ func routes(templates *template.Template) http.Handler {
 		}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		err := templates.ExecuteTemplate(w, "artists", data)
+		err := templates.ExecuteTemplate(w, "error404", data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.Println(err)
@@ -84,3 +91,31 @@ func routes(templates *template.Template) http.Handler {
 	mux.HandleFunc("/relation", api.DataHandler)
 	return mux
 }
+
+// func handleSearch(w http.ResponseWriter, r *http.Request) {
+// 	// 1. Pega o parâmetro "q" da URL (ex: /api/search?q=not)
+// 	query := r.URL.Query().Get("q")
+// 	query = strings.ToLower(strings.TrimSpace(query))
+
+// 	if query == "" {
+// 		w.Header().Set("Content-Type", "application/json")
+// 		json.NewEncoder(w).Encode([]string{})
+// 		return
+// 	}
+
+// 	var result []string
+// 	for _, p := range bands {
+// 		if strings.Contains(strings.ToLower(p), query) {
+// 			result = append(result, p)
+// 		}
+// 	}
+
+// 	// -- Limit 10
+// 	if len(result) > 10 {
+// 		result = result[:10]
+// 	}
+
+// 	// -- Return Json
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(result)
+// }
