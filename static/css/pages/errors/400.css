@@ -1,0 +1,43 @@
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Metal Mania", system-ui;
+    background: url("/static/images/error.png");
+    background-size: cover;
+    background-position: 20%;
+    background-repeat: no-repeat;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.23);
+    height: 100%;
+}
+h1 {
+    height: 100%;
+    text-align: center;
+    display: flex;
+    color: black;
+    padding-top: 10%;
+    font-size: 8rem;
+    justify-content: center;
+    text-shadow: 0 0 10px hsl(46, 100%, 38%), 0 0 10px hsl(46, 100%, 38%), 0 0 10px hsl(46, 100%, 38%);
+    /* background-color: blue; */
+}
+.card-info p {
+    /* background-color: aqua; */
+    color: rgb(22, 22, 22);
+    font-size: 3rem;
+    text-align: center;
+}

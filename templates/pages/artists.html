@@ -1,0 +1,75 @@
+{{define "artists"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/pages/artists.css?v=4">
+    <link rel="stylesheet" href="/static/css/components/header.css?v=4">
+    <link rel="stylesheet" href="/static/css/components/footer.css?v=4">
+    <title>{{.Title}}</title>
+</head>
+
+<body>
+    <!-- Header -->
+    {{template "header" .}}
+
+    {{if .Artists}}
+    <section class="card">
+        <div class="card-artist">
+            <h2 class="title-card">Informations</h2>
+            {{range .Artists}}
+            <div class="artist-content">
+                <div class="artist-left">
+                    <img src="{{.Image}}" alt="{{.Name}}">
+                    <h4 class="artist-name">{{.Name}}</h4>
+                </div>
+                <div class="info-artist">
+                    <h4>Description: </h4>
+                    <p class="description">Since {{.CreationDate}} and his first album it was at {{.FirstAlbum}}</p>
+                    <h4>Locations: </h4>
+                    <p class="locations">{{- range $i, $loc := .Locations -}}
+                        {{- if $i}}, {{end -}}
+                        {{- $loc -}}
+                        {{- end -}}</p>
+                    <h4>Show's Dates: </h4>
+                    <p class="dates">{{- range $i, $dates := .Dates -}}
+                        {{- if $i}}, {{end -}}
+                        {{- $dates -}}
+                        {{- end -}}</p>
+                    <h4>Members: </h4>
+                    <p class="members">{{- range $i, $member := .Members -}}
+                        {{- if $i}}, {{end -}}
+                        {{- $member -}}
+                        {{- end -}}</p>
+                    <h4>Relations: </h4>
+                    <p class="relations">
+                        {{- range $city, $dates := .Relations -}}
+                            {{- $city -}}: {{- range $i, $d := $dates -}}
+                                {{- if $i}}, {{end -}}
+                                {{- $d -}}
+                            {{- end -}}
+                            {{- if not (eq $city "")}}, {{end -}}
+                        {{- end -}}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </section>
+    {{else}}
+    <div class="no-results">
+        <p>No artists found matching "{{.Query}}"</p>
+    </div>
+    {{end}}
+
+    <!-- Footer -->
+    {{template "footer" .}}
+</body>
+
+</html>
+{{end}}

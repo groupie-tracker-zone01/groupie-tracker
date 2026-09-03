@@ -15,7 +15,6 @@ type Artist struct {
 	FirstAlbum   string   `json:"firstAlbum"`
 }
 
-// Type de structure enveloppe pour mémoriser la propriété Index qui englobe les autres propriétés
 type LocationWrapper struct {
 	LocWrapper []Location `json:"index"`
 }
@@ -51,6 +50,18 @@ type AppData struct {
 	Relations RelationWrapper
 }
 
+type ArtistFull struct {
+	Id           int                 `json:"id"`
+	Image        string              `json:"image"`
+	Name         string              `json:"name"`
+	Members      []string            `json:"members"`
+	CreationDate int                 `json:"creationDate"`
+	FirstAlbum   string              `json:"firstAlbum"`
+	Locations    []string            `json:"locations"`
+	Dates        []string            `json:"dates"`
+	Relations    map[string][]string `json:"relations"`
+}
+
 const baseURL = "https://groupietrackers.herokuapp.com/api"
 
 func LoadData() (*AppData, error) {
@@ -80,6 +91,85 @@ func fetchJSON(url string, target any) error {
 		return fmt.Errorf("API returned status: %s", response.Status)
 	}
 	return json.NewDecoder(response.Body).Decode(target)
+}
+
+func GetFullArtists(data *AppData) []ArtistFull {
+	var fullArtists []ArtistFull
+
+	for _, artist := range data.Artists {
+		full := ArtistFull{
+			Id:           artist.Id,
+			Image:        artist.Image,
+			Name:         artist.Name,
+			Members:      artist.Members,
+			CreationDate: artist.CreationDate,
+			FirstAlbum:   artist.FirstAlbum,
+		}
+
+		for _, loc := range data.Locations.LocWrapper {
+			if loc.Id == artist.Id {
+				full.Locations = loc.Locations
+				break
+			}
+		}
+
+		for _, d := range data.Dates.DatWrapper {
+			if d.Id == artist.Id {
+				full.Dates = d.Dates
+				break
+			}
+		}
+
+		for _, rel := range data.Relations.RelWrapper {
+			if rel.Id == artist.Id {
+				full.Relations = rel.DatesLocations
+				break
+			}
+		}
+
+		fullArtists = append(fullArtists, full)
+	}
+
+	return fullArtists
+}
+
+func GetArtistFull(data *AppData, artistId int) *ArtistFull {
+	for _, artist := range data.Artists {
+		if artist.Id == artistId {
+			full := &ArtistFull{
+				Id:           artist.Id,
+				Image:        artist.Image,
+				Name:         artist.Name,
+				Members:      artist.Members,
+				CreationDate: artist.CreationDate,
+				FirstAlbum:   artist.FirstAlbum,
+			}
+
+			for _, loc := range data.Locations.LocWrapper {
+				if loc.Id == artistId {
+					full.Locations = loc.Locations
+					break
+				}
+			}
+
+			for _, d := range data.Dates.DatWrapper {
+				if d.Id == artistId {
+					full.Dates = d.Dates
+					break
+				}
+			}
+
+			for _, rel := range data.Relations.RelWrapper {
+				if rel.Id == artistId {
+					full.Relations = rel.DatesLocations
+					break
+				}
+			}
+
+			return full
+		}
+	}
+	return nil
 }
 
 func ArtistsHandler(data *AppData) http.HandlerFunc {

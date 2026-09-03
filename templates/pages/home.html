@@ -33,9 +33,10 @@
                 <button class="carousel-btn next" id="next-btn"> ❯ </button>
             </div> 
 
-            <form action="/" method="GET" class="search-form-overlay">
+            <form action="/artists" method="GET" class="search-form-overlay">
                 <section class="search-bar">
-                    <input type="text" name="search" class="search" placeholder="Type an artist..." maxlength="30" pattern="[A-Za-z0-9]+" title="Just letters, numbers and spaces are allowed">
+                    <input type="text" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}">
+                    <div id="suggestions-box"></div>
                     <button type="submit" class="search-btn">Search</button>
                 </section>
             </form>
