@@ -53,6 +53,7 @@ func serverPort() string {
 	if port := os.Getenv(portEnv); port != "" {
 		return port
 	}
+
 	return defaultPort
 }
 
