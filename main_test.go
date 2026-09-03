@@ -1,53 +1,75 @@
 package main
 
 import (
+	"api/api"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 )
 
+// Regression test:
+// The home route must stay connected to the API data
+// and display artists on the home page.
 func TestHome(t *testing.T) {
+	data := &api.AppData{
+		Artists: []api.Artist{
+			{
+				Id:    1,
+				Name:  "Queen",
+				Image: "https://example.com/queen.jpg",
+			},
+		},
+	}
+
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	routes().ServeHTTP(response, request)
+	routes(data).ServeHTTP(response, request)
 
 	if response.Code != http.StatusOK {
-		t.Fatalf("statut reçu %d, attendu %d", response.Code, http.StatusOK)
+		t.Fatalf("got status %d, want %d", response.Code, http.StatusOK)
 	}
 
-	if !strings.Contains(response.Body.String(), "Groupie Tracker") {
-		t.Fatal("la page temporaire ne contient pas le titre attendu")
+	body := response.Body.String()
+
+	if !strings.Contains(body, "Queen") {
+		t.Fatal("home page does not contain artist data")
+	}
+
+	if !strings.Contains(body, "https://example.com/queen.jpg") {
+		t.Fatal("home page does not contain artist image")
 	}
 }
 
+// Regression test:
+// An unknown route must continue to return HTTP 404.
 func TestNotFound(t *testing.T) {
-	request := httptest.NewRequest(http.MethodGet, "/inconnue", nil)
+	request := httptest.NewRequest(http.MethodGet, "/does-not-exist", nil)
 	response := httptest.NewRecorder()
 
-	routes().ServeHTTP(response, request)
+	routes(&api.AppData{}).ServeHTTP(response, request)
 
 	if response.Code != http.StatusNotFound {
-		t.Fatalf("statut reçu %d, attendu %d", response.Code, http.StatusNotFound)
+		t.Fatalf("got status %d, want %d", response.Code, http.StatusNotFound)
 	}
 }
 
 func TestServerPort(t *testing.T) {
-	t.Run("port par défaut", func(t *testing.T) {
-		t.Setenv(portEnv, "")
+	t.Run("default port", func(t *testing.T) {
+		os.Unsetenv(portEnv)
 
-		if port := serverPort(); port != defaultPort {
-			t.Fatalf("port reçu %q, attendu %q", port, defaultPort)
+		if got := serverPort(); got != defaultPort {
+			t.Fatalf("got port %q, want %q", got, defaultPort)
 		}
 	})
 
-	t.Run("port configuré", func(t *testing.T) {
-		const configuredPort = "9090"
-		t.Setenv(portEnv, configuredPort)
+	t.Run("environment port", func(t *testing.T) {
+		t.Setenv(portEnv, "9090")
 
-		if port := serverPort(); port != configuredPort {
-			t.Fatalf("port reçu %q, attendu %q", port, configuredPort)
+		if got := serverPort(); got != "9090" {
+			t.Fatalf("got port %q, want %q", got, "9090")
 		}
 	})
 }
