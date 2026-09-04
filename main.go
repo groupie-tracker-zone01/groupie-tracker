@@ -63,15 +63,24 @@ func routes(templates *template.Template, data *api.AppData, fullArtists []api.A
 	fs := http.FileServer(http.Dir("./static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
+	// --- Home page data --- //
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// --- Home page data --- //
+		if r.URL.Path != "/" {
+			renderErrors(w, http.StatusNotFound, templates)
+			return
+		}
+		if r.Method != http.MethodGet {
+			renderErrors(w, http.StatusMethodNotAllowed, templates)
+			return
+		}
+
 		homeData := struct {
 			Title   string
 			Artists []api.ArtistFull
 			Query   string
 		}{
 			Title:   "Home - MetaRock",
-			Artists: fullArtists,
+			Artists: []api.ArtistFull{}, // empty list
 			Query:   "",
 		}
 
@@ -85,12 +94,16 @@ func routes(templates *template.Template, data *api.AppData, fullArtists []api.A
 
 	// --- Artists Page --- //
 	mux.HandleFunc("/artists", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			renderErrors(w, http.StatusMethodNotAllowed, templates)
+			return
+		}
+
 		query := r.URL.Query().Get("q")
 		query = strings.TrimSpace(query)
 
 		if query == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			templates.ExecuteTemplate(w, "400", nil)
+			renderErrors(w, http.StatusBadRequest, templates)
 			return
 		}
 

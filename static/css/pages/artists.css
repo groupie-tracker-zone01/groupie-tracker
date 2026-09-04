@@ -136,11 +136,13 @@ main {
     font-family: "Metal Mania", system-ui;
 }
 
+/* Info-Cards */
+
 .description,
 .locations,
 .members,
-.dates,
-.relations {
+.date-tag,
+.relations-dates-tag {
     display: inline-block;
     padding: 0.3rem 1rem;
     border-radius: 20px;
@@ -151,11 +153,42 @@ main {
 .description:hover,
 .locations:hover,
 .members:hover,
-.dates:hover,
-.relations:hover {
+.date-tag:hover,
+.relations-dates-tag:hover {
     transform: scale(1.05);
 }
 
+.relations-dates-tag {
+   background-color: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 20px;
+    display: inline-block;
+    margin: 2px;
+    font-size: 14px;
+    box-shadow:  1px 1px 1px black,
+        1px -1px 0 black,
+        -1px  1px 0 black,
+        2px  5px 0 black;;
+}
+
+.relations-city {
+    background: none !important;
+    border: none !important;
+    color: inherit;
+    font-weight: 100;
+    margin-right: 5px;
+    padding: 0;
+    display: inline;
+    text-shadow: 
+        1px 1px 1px black,
+        1px -1px 0 black,
+        -1px  1px 0 black,
+        2px  2px 0 black;
+
+}
+
+/* Research failed */
 .no-results {
     background-color: rgba(255, 255, 255, 0.519);
     text-align: center;

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sort"
+	"time"
 )
 
 type Artist struct {
@@ -50,6 +52,12 @@ type AppData struct {
 	Relations RelationWrapper
 }
 
+// --- Relations --- //
+type LastConcert struct {
+	City     string
+	LastDate string
+}
+
 type ArtistFull struct {
 	Id           int                 `json:"id"`
 	Image        string              `json:"image"`
@@ -60,6 +68,7 @@ type ArtistFull struct {
 	Locations    []string            `json:"locations"`
 	Dates        []string            `json:"dates"`
 	Relations    map[string][]string `json:"relations"`
+	LastConcerts []LastConcert       `json:"lastConcerts"`
 }
 
 const baseURL = "https://groupietrackers.herokuapp.com/api"
@@ -93,6 +102,19 @@ func fetchJSON(url string, target any) error {
 	return json.NewDecoder(response.Body).Decode(target)
 }
 
+func sortDates(dates []string) []string {
+	sorted := make([]string, len(dates))
+	copy(sorted, dates)
+
+	sort.Slice(sorted, func(i, j int) bool {
+		t1, _ := time.Parse("02-01-2006", sorted[i])
+		t2, _ := time.Parse("02-01-2006", sorted[j])
+		return t1.Before(t2)
+	})
+
+	return sorted
+}
+
 func GetFullArtists(data *AppData) []ArtistFull {
 	var fullArtists []ArtistFull
 
@@ -105,17 +127,19 @@ func GetFullArtists(data *AppData) []ArtistFull {
 			CreationDate: artist.CreationDate,
 			FirstAlbum:   artist.FirstAlbum,
 		}
+		sort.Strings(full.Members)
 
 		for _, loc := range data.Locations.LocWrapper {
 			if loc.Id == artist.Id {
 				full.Locations = loc.Locations
+				sort.Strings(full.Locations)
 				break
 			}
 		}
 
 		for _, d := range data.Dates.DatWrapper {
 			if d.Id == artist.Id {
-				full.Dates = d.Dates
+				full.Dates = sortDates(d.Dates)
 				break
 			}
 		}
@@ -127,8 +151,25 @@ func GetFullArtists(data *AppData) []ArtistFull {
 			}
 		}
 
+		for city, dates := range full.Relations {
+			if len(dates) > 0 {
+				sortedDates := sortDates(dates)
+				full.LastConcerts = append(full.LastConcerts, LastConcert{
+					City:     city,
+					LastDate: sortedDates[len(sortedDates)-1],
+				})
+			}
+		}
+
+		sort.Slice(full.LastConcerts, func(i, j int) bool {
+			return full.LastConcerts[i].LastDate > full.LastConcerts[j].LastDate
+		})
+
 		fullArtists = append(fullArtists, full)
 	}
+	sort.Slice(fullArtists, func(i, j int) bool {
+		return fullArtists[i].Name < fullArtists[j].Name
+	})
 
 	return fullArtists
 }

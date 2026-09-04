@@ -21,7 +21,7 @@
     {{if .Artists}}
     <section class="card">
         <div class="card-artist">
-            <h2 class="title-card">Informations</h2>
+            <h2 class="title-card">Artist(s) Informations: </h2>
             {{range .Artists}}
             <div class="artist-content">
                 <div class="artist-left">
@@ -30,17 +30,19 @@
                 </div>
                 <div class="info-artist">
                     <h4>Description: </h4>
-                    <p class="description">Since {{.CreationDate}} and his first album it was at {{.FirstAlbum}}</p>
+                    <p class="description">Created in {{.CreationDate}} and first album at {{.FirstAlbum}}</p>
                     <h4>Locations: </h4>
                     <p class="locations">{{- range $i, $loc := .Locations -}}
                         {{- if $i}}, {{end -}}
                         {{- $loc -}}
                         {{- end -}}</p>
                     <h4>Show's Dates: </h4>
-                    <p class="dates">{{- range $i, $dates := .Dates -}}
+                    <p class="dates">
+                        {{- range $i, $date := .Dates -}}
                         {{- if $i}}, {{end -}}
-                        {{- $dates -}}
-                        {{- end -}}</p>
+                        <span class="date-tag">{{$date}}</span>
+                        {{- end -}}
+                    </p>
                     <h4>Members: </h4>
                     <p class="members">{{- range $i, $member := .Members -}}
                         {{- if $i}}, {{end -}}
@@ -48,12 +50,10 @@
                         {{- end -}}</p>
                     <h4>Relations: </h4>
                     <p class="relations">
-                        {{- range $city, $dates := .Relations -}}
-                            {{- $city -}}: {{- range $i, $d := $dates -}}
-                                {{- if $i}}, {{end -}}
-                                {{- $d -}}
-                            {{- end -}}
-                            {{- if not (eq $city "")}}, {{end -}}
+                        {{- range .LastConcerts -}}
+                            <strong class="relations-city">{{.City}}:</strong>
+                            <span class="relations-dates-tag">{{.LastDate}}</span>
+                            <br>
                         {{- end -}}
                     </p>
                 </div>
@@ -69,6 +69,8 @@
 
     <!-- Footer -->
     {{template "footer" .}}
+
+    <script src="/static/JS/artists.js"></script>
 </body>
 
 </html>
