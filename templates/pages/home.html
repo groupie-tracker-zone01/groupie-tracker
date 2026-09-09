@@ -33,17 +33,24 @@
                 <button class="carousel-btn next" id="next-btn"> ❯ </button>
             </div>
 
-            <form action="/artists" method="GET" class="search-form-overlay">
-                <section class="search-bar">
-                    <input type="text" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" list="artists-list">
-                    <datalist id="artists-list">
-                        {{range .Suggestions}}
-                        <option value="{{.Name}}"></option>
-                        {{end}}
-                    </datalist>
+            <div class="search-form-overlay">
+                <form action="/artists" method="GET" class="search-bar">
+                    <input type="text" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}">
                     <button type="submit" class="search-btn">Search</button>
-                </section>
-            </form>
+                </form>
+
+                <div class="search-choice">or choose an artist</div>
+
+                <form action="/artists" method="GET" class="artist-select-bar">
+                    <select name="q" class="artist-select" required>
+                        <option value="" disabled selected>Choose an artist...</option>
+                        {{range .Suggestions}}
+                        <option value="{{.Name}}">{{.Name}}</option>
+                        {{end}}
+                    </select>
+                    <button type="submit" class="select-btn">View</button>
+                </form>
+            </div>
         </section>
 
         <!-- Minimum artist display required by the MVP -->
