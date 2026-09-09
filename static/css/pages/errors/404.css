@@ -1,0 +1,61 @@
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Metal Mania", system-ui;
+    background: url("/static/images/funeral.jpg");
+    background-size: cover;
+    background-position: 20%;
+    background-repeat: no-repeat;
+}
+
+.card {
+    background-color: rgba(255, 255, 255, 0.23);
+    height: 100%;
+}
+
+.card-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%; 
+}
+
+h1 {
+    text-align: center;
+    display: flex;
+    color: black;
+    font-size: 8rem;
+    justify-content: center;
+    text-shadow: 0 0 10px hsl(46, 100%, 38%), 0 0 10px hsl(46, 100%, 38%), 0 0 10px hsl(46, 100%, 38%);
+}
+.card-info p {
+    color: rgb(0, 0, 0);
+    font-size: 3rem;
+    text-align: center;
+}
+
+.card-info a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(12, 13, 13);
+    width: 10%;
+    border-radius: 3rem;
+    text-decoration: none;
+    color: white;
+    padding: 1rem;
+    margin-top: 1rem;
+}

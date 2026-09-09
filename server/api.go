@@ -1,4 +1,4 @@
-package api
+package server
 
 import (
 	"encoding/json"
@@ -17,6 +17,7 @@ type Artist struct {
 	FirstAlbum   string   `json:"firstAlbum"`
 }
 
+// structure type for wrapping the index property that wraps other json properties
 type LocationWrapper struct {
 	LocWrapper []Location `json:"index"`
 }
@@ -45,6 +46,7 @@ type Relation struct {
 	DatesLocations map[string][]string `json:"datesLocations"`
 }
 
+// Structure type to store all the data from the API
 type AppData struct {
 	Artists   []Artist
 	Locations LocationWrapper
@@ -52,12 +54,13 @@ type AppData struct {
 	Relations RelationWrapper
 }
 
-// --- Relations --- //
+// Relations
 type LastConcert struct {
-	City     string
-	LastDate string
+	City  string
+	Dates []string
 }
 
+// Structure type to store all the data of an artist
 type ArtistFull struct {
 	Id           int                 `json:"id"`
 	Image        string              `json:"image"`
@@ -111,13 +114,11 @@ func sortDates(dates []string) []string {
 		t2, _ := time.Parse("02-01-2006", sorted[j])
 		return t1.Before(t2)
 	})
-
 	return sorted
 }
 
 func GetFullArtists(data *AppData) []ArtistFull {
 	var fullArtists []ArtistFull
-
 	for _, artist := range data.Artists {
 		full := ArtistFull{
 			Id:           artist.Id,
@@ -128,7 +129,6 @@ func GetFullArtists(data *AppData) []ArtistFull {
 			FirstAlbum:   artist.FirstAlbum,
 		}
 		sort.Strings(full.Members)
-
 		for _, loc := range data.Locations.LocWrapper {
 			if loc.Id == artist.Id {
 				full.Locations = loc.Locations
@@ -136,41 +136,37 @@ func GetFullArtists(data *AppData) []ArtistFull {
 				break
 			}
 		}
-
 		for _, d := range data.Dates.DatWrapper {
 			if d.Id == artist.Id {
 				full.Dates = sortDates(d.Dates)
 				break
 			}
 		}
-
 		for _, rel := range data.Relations.RelWrapper {
 			if rel.Id == artist.Id {
 				full.Relations = rel.DatesLocations
 				break
 			}
 		}
-
 		for city, dates := range full.Relations {
 			if len(dates) > 0 {
 				sortedDates := sortDates(dates)
 				full.LastConcerts = append(full.LastConcerts, LastConcert{
-					City:     city,
-					LastDate: sortedDates[len(sortedDates)-1],
+					City:  city,
+					Dates: sortedDates,
 				})
 			}
 		}
-
 		sort.Slice(full.LastConcerts, func(i, j int) bool {
-			return full.LastConcerts[i].LastDate > full.LastConcerts[j].LastDate
+			li := full.LastConcerts[i].Dates[len(full.LastConcerts[i].Dates)-1]
+			lj := full.LastConcerts[j].Dates[len(full.LastConcerts[j].Dates)-1]
+			return li > lj
 		})
-
 		fullArtists = append(fullArtists, full)
 	}
 	sort.Slice(fullArtists, func(i, j int) bool {
 		return fullArtists[i].Name < fullArtists[j].Name
 	})
-
 	return fullArtists
 }
 
@@ -185,28 +181,40 @@ func GetArtistFull(data *AppData, artistId int) *ArtistFull {
 				CreationDate: artist.CreationDate,
 				FirstAlbum:   artist.FirstAlbum,
 			}
-
+			sort.Strings(full.Members)
 			for _, loc := range data.Locations.LocWrapper {
 				if loc.Id == artistId {
 					full.Locations = loc.Locations
+					sort.Strings(full.Locations)
 					break
 				}
 			}
-
 			for _, d := range data.Dates.DatWrapper {
 				if d.Id == artistId {
-					full.Dates = d.Dates
+					full.Dates = sortDates(d.Dates)
 					break
 				}
 			}
-
 			for _, rel := range data.Relations.RelWrapper {
 				if rel.Id == artistId {
 					full.Relations = rel.DatesLocations
 					break
 				}
 			}
-
+			for city, dates := range full.Relations {
+				if len(dates) > 0 {
+					sortedDates := sortDates(dates)
+					full.LastConcerts = append(full.LastConcerts, LastConcert{
+						City:  city,
+						Dates: sortedDates,
+					})
+				}
+			}
+			sort.Slice(full.LastConcerts, func(i, j int) bool {
+				li := full.LastConcerts[i].Dates[len(full.LastConcerts[i].Dates)-1]
+				lj := full.LastConcerts[j].Dates[len(full.LastConcerts[j].Dates)-1]
+				return li > lj
+			})
 			return full
 		}
 	}

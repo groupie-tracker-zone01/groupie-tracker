@@ -12,7 +12,7 @@ body {
 header {
     top: 0;
     position: sticky;
-    display: block; /* Trocado de inline-block para block (não quebra o layout) */
+    display: block;
     width: 100%;
     height: auto;
     background-color: rgb(6, 6, 6);

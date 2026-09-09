@@ -1,13 +1,13 @@
 package main
 
 import (
-	"api/api"
-	"encoding/json"
 	"fmt"
+	"groupie-tracker/server"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -15,30 +15,33 @@ const (
 	portEnv     = "PORT"
 )
 
-const baseURL = "https://groupietrackers.herokuapp.com/api"
-
-func fetchJSON(url string, target any) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("API: statut inattendu %s", resp.Status)
-	}
-
-	return json.NewDecoder(resp.Body).Decode(target)
-}
-
 func main() {
-	data, err := api.LoadData()
+	dir, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	if err := http.ListenAndServe(":8080", routes(data)); err != nil {
+	data, err := server.LoadData()
+	if err != nil {
 		log.Fatal(err)
+	}
+	// API full data artists
+	fullArtists := server.GetFullArtists(data)
+	templates := template.Must(template.ParseFiles(
+		filepath.Join(dir, "templates", "pages", "home.html"),
+		filepath.Join(dir, "templates", "pages", "artists.html"),
+		filepath.Join(dir, "templates", "base", "header.html"),
+		filepath.Join(dir, "templates", "base", "footer.html"),
+		filepath.Join(dir, "templates", "pages", "errors", "400.html"),
+		filepath.Join(dir, "templates", "pages", "errors", "403.html"),
+		filepath.Join(dir, "templates", "pages", "errors", "404.html"),
+		filepath.Join(dir, "templates", "pages", "errors", "405.html"),
+		filepath.Join(dir, "templates", "pages", "errors", "500.html"),
+	))
+	router := server.Routes(templates, data, fullArtists)
+	port := serverPort()
+	fmt.Printf("Server running at http://localhost:%s\n", port)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
+		log.Fatalf("Error starting server: %v", err)
 	}
 }
 
@@ -46,45 +49,5 @@ func serverPort() string {
 	if port := os.Getenv(portEnv); port != "" {
 		return port
 	}
-
 	return defaultPort
-}
-
-func routes(data *api.AppData) http.Handler {
-	mux := http.NewServeMux()
-
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
-	mux.HandleFunc("/", homeHandler(data))
-	mux.HandleFunc("/artists", api.ArtistsHandler(data))
-	mux.HandleFunc("/locations", api.LocationsHandler(data))
-	mux.HandleFunc("/dates", api.DatesHandler(data))
-	mux.HandleFunc("/relations", api.RelationsHandler(data))
-
-	return mux
-}
-
-func homeHandler(data *api.AppData) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-
-		tmpl, err := template.ParseFiles(
-			"templates/pages/home.html",
-			"templates/base/header.html",
-			"templates/base/footer.html",
-		)
-		if err != nil {
-			http.Error(w, "Unable to load page", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-		if err := tmpl.ExecuteTemplate(w, "home", data); err != nil {
-			log.Println(err)
-		}
-	}
 }
