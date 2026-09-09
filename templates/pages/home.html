@@ -34,13 +34,15 @@
             </div>
 
             <div class="search-form-overlay">
+                <!-- No search JavaScript: this form sends GET /artists?q=... to the Go server. -->
                 <form action="/artists" method="GET" class="search-bar">
-                    <input type="text" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}">
+                    <input type="text" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" required>
                     <button type="submit" class="search-btn">Search</button>
                 </form>
 
                 <div class="search-choice">or choose an artist</div>
 
+                <!-- Native HTML fallback to browse the complete artist list without JavaScript. -->
                 <form action="/artists" method="GET" class="artist-select-bar">
                     <select name="q" class="artist-select" required>
                         <option value="" disabled selected>Choose an artist...</option>
