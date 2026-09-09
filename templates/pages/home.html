@@ -35,8 +35,12 @@
 
             <form action="/artists" method="GET" class="search-form-overlay">
                 <section class="search-bar">
-                    <input type="text" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}">
-                    <div id="suggestions-box"></div>
+                    <input type="text" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" list="artists-list">
+                    <datalist id="artists-list">
+                        {{range .Suggestions}}
+                        <option value="{{.Name}}"></option>
+                        {{end}}
+                    </datalist>
                     <button type="submit" class="search-btn">Search</button>
                 </section>
             </form>
