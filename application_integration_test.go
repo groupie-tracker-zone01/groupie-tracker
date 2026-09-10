@@ -87,19 +87,38 @@ func TestApplicationUsesRealTemplates(t *testing.T) {
 			}
 		}
 	})
+}
 
-	t.Run("unknown route renders the real 404 page", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/does-not-exist", nil)
-		res := httptest.NewRecorder()
-		handler.ServeHTTP(res, req)
+func TestApplicationRoutesRenderVisibleErrors(t *testing.T) {
+	data, fullArtists := applicationTestData()
+	handler := server.Routes(applicationTemplates(t), data, fullArtists)
 
-		if res.Code != http.StatusNotFound {
-			t.Fatalf("unknown route returned %d, want %d", res.Code, http.StatusNotFound)
-		}
-		if res.Body.Len() == 0 {
-			t.Fatal("404 page is empty")
-		}
-	})
+	tests := []struct {
+		name   string
+		method string
+		path   string
+		status int
+		text   string
+	}{
+		{name: "400", method: http.MethodGet, path: "/artists", status: http.StatusBadRequest, text: "Error 400 - Bad Request"},
+		{name: "404", method: http.MethodGet, path: "/does-not-exist", status: http.StatusNotFound, text: "Error 404 - Not Found"},
+		{name: "405", method: http.MethodPost, path: "/", status: http.StatusMethodNotAllowed, text: "Error 405 - Method Not Allowed"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(tt.method, tt.path, nil)
+			res := httptest.NewRecorder()
+			handler.ServeHTTP(res, req)
+
+			if res.Code != tt.status {
+				t.Fatalf("%s %s returned %d, want %d", tt.method, tt.path, res.Code, tt.status)
+			}
+			if !strings.Contains(res.Body.String(), tt.text) {
+				t.Fatalf("error page does not contain %q: %q", tt.text, res.Body.String())
+			}
+		})
+	}
 }
 
 func TestApplicationServesStaticAssets(t *testing.T) {
@@ -110,6 +129,11 @@ func TestApplicationServesStaticAssets(t *testing.T) {
 		"/static/css/pages/home.css",
 		"/static/JS/home.js",
 		"/static/JS/artists.js",
+		"/static/css/pages/errors/400.css",
+		"/static/css/pages/errors/403.css",
+		"/static/css/pages/errors/404.css",
+		"/static/css/pages/errors/405.css",
+		"/static/css/pages/errors/500.css",
 	} {
 		t.Run(path, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, path, nil)
