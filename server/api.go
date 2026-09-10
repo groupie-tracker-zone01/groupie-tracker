@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -74,27 +75,45 @@ type ArtistFull struct {
 	LastConcerts []LastConcert       `json:"lastConcerts"`
 }
 
-const baseURL = "https://groupietrackers.herokuapp.com/api"
+const (
+	baseURL           = "https://groupietrackers.herokuapp.com/api"
+	apiRequestTimeout = 5 * time.Second
+)
+
+var apiHTTPClient = &http.Client{Timeout: apiRequestTimeout}
 
 func LoadData() (*AppData, error) {
+	return loadDataContext(context.Background(), apiHTTPClient)
+}
+
+func loadDataContext(ctx context.Context, client *http.Client) (*AppData, error) {
 	data := &AppData{}
-	if err := fetchJSON(baseURL+"/artists", &data.Artists); err != nil {
+	if err := fetchJSONContext(ctx, client, baseURL+"/artists", &data.Artists); err != nil {
 		return nil, fmt.Errorf("chargement artists: %w", err)
 	}
-	if err := fetchJSON(baseURL+"/locations", &data.Locations); err != nil {
+	if err := fetchJSONContext(ctx, client, baseURL+"/locations", &data.Locations); err != nil {
 		return nil, fmt.Errorf("chargement locations: %w", err)
 	}
-	if err := fetchJSON(baseURL+"/dates", &data.Dates); err != nil {
+	if err := fetchJSONContext(ctx, client, baseURL+"/dates", &data.Dates); err != nil {
 		return nil, fmt.Errorf("chargement dates: %w", err)
 	}
-	if err := fetchJSON(baseURL+"/relation", &data.Relations); err != nil {
+	if err := fetchJSONContext(ctx, client, baseURL+"/relation", &data.Relations); err != nil {
 		return nil, fmt.Errorf("chargement relation: %w", err)
 	}
 	return data, nil
 }
 
 func fetchJSON(url string, target any) error {
-	response, err := http.Get(url)
+	return fetchJSONContext(context.Background(), apiHTTPClient, url, target)
+}
+
+func fetchJSONContext(ctx context.Context, client *http.Client, url string, target any) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+
+	response, err := client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -193,13 +212,13 @@ func GetArtistFull(data *AppData, artistId int) *ArtistFull {
 				if d.Id == artistId {
 					full.Dates = sortDates(d.Dates)
 					break
-				}
+			}
 			}
 			for _, rel := range data.Relations.RelWrapper {
 				if rel.Id == artistId {
 					full.Relations = rel.DatesLocations
 					break
-				}
+			}
 			}
 			for city, dates := range full.Relations {
 				if len(dates) > 0 {
