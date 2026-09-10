@@ -8,11 +8,16 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 const (
-	defaultPort = "8080"
-	portEnv     = "PORT"
+	defaultPort             = "8080"
+	portEnv                 = "PORT"
+	serverReadHeaderTimeout = 5 * time.Second
+	serverReadTimeout       = 10 * time.Second
+	serverWriteTimeout      = 15 * time.Second
+	serverIdleTimeout       = 60 * time.Second
 )
 
 func main() {
@@ -39,8 +44,9 @@ func main() {
 	))
 	router := server.Routes(templates, data, fullArtists)
 	port := serverPort()
+	serverHTTP := newHTTPServer(port, router)
 	fmt.Printf("Server running at http://localhost:%s\n", port)
-	if err := http.ListenAndServe(":"+port, router); err != nil {
+	if err := serverHTTP.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Error starting server: %v", err)
 	}
 }
@@ -50,4 +56,15 @@ func serverPort() string {
 		return port
 	}
 	return defaultPort
+}
+
+func newHTTPServer(port string, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              ":" + port,
+		Handler:           handler,
+		ReadHeaderTimeout: serverReadHeaderTimeout,
+		ReadTimeout:       serverReadTimeout,
+		WriteTimeout:      serverWriteTimeout,
+		IdleTimeout:       serverIdleTimeout,
+	}
 }
