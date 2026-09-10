@@ -90,7 +90,7 @@ func TestArtistsSearch(t *testing.T) {
 	handler := Routes(testTemplates(t), data, fullArtists)
 
 	t.Run("partial query", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/artists?q=queen", nil)
+		req := httptest.NewRequest(http.MethodGet, "/artists?q=que", nil)
 		res := httptest.NewRecorder()
 		handler.ServeHTTP(res, req)
 
