@@ -212,13 +212,13 @@ func GetArtistFull(data *AppData, artistId int) *ArtistFull {
 				if d.Id == artistId {
 					full.Dates = sortDates(d.Dates)
 					break
-			}
+				}
 			}
 			for _, rel := range data.Relations.RelWrapper {
 				if rel.Id == artistId {
 					full.Relations = rel.DatesLocations
 					break
-			}
+				}
 			}
 			for city, dates := range full.Relations {
 				if len(dates) > 0 {
