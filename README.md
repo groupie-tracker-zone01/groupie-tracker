@@ -65,3 +65,8 @@ go test ./...
 - Une Pull Request doit correspondre à un ticket.
 - Garder les commits courts, explicites et centrés sur une seule modification.
 - Mettre à jour sa branche avec `main` avant la fusion.
+
+## Déploiement
+
+- Création de l'image Docker : docker build -t <nom-image>.
+- Lancement du conteneur : docker run -d --name <nom-conteneur> -p 8080:8080 <nom-image>
