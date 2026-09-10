@@ -8,52 +8,51 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/pages/home.css?v=4">
-    <link rel="stylesheet" href="/static/css/components/header.css?v=4">
-    <link rel="stylesheet" href="/static/css/components/footer.css?v=4">
-    <title>Document</title>
+    <link rel="stylesheet" href="/static/css/pages/home.css?v=5">
+    <link rel="stylesheet" href="/static/css/components/header.css?v=5">
+    <link rel="stylesheet" href="/static/css/components/footer.css?v=5">
+    <link rel="stylesheet" href="/static/css/components/accessibility.css?v=1">
+    <title>MetaRock</title>
 </head>
 
 <body>
-    <!-- Header -->
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     {{template "header" .}}
 
-    <main>
-        <section class="hero-container">
-            <!-- Carousel -->
-            <div class="carousel">
+    <main id="main-content">
+        <section class="hero-container" aria-label="Artist search">
+            <div class="carousel" id="carousel" role="region" aria-roledescription="carousel" aria-label="Rock images" tabindex="0">
                 <div class="carousel-inner" id="carousel-inner">
-                    <img src="/static/images/logo.png" class="carousel-item active" alt="photo1">
-                    <img src="/static/images/rock.png" class="carousel-item" alt="photo2">
-                    <img src="/static/images/roll.png" class="carousel-item" alt="photo3">
-                    <img src="/static/images/guitar.png" class="carousel-item" alt="photo4">
-                    <img src="/static/images/caveiras.png" class="carousel-item" alt="photo5">
+                    <img src="/static/images/logo.png" class="carousel-item active" alt="MetaRock logo">
+                    <img src="/static/images/rock.png" class="carousel-item" alt="">
+                    <img src="/static/images/roll.png" class="carousel-item" alt="">
+                    <img src="/static/images/guitar.png" class="carousel-item" alt="">
+                    <img src="/static/images/caveiras.png" class="carousel-item" alt="">
                 </div>
-                <button class="carousel-btn prev" id="prev-btn"> ❮ </button>
-                <button class="carousel-btn next" id="next-btn"> ❯ </button>
+                <button type="button" class="carousel-btn prev" id="prev-btn" aria-label="Previous slide">❮</button>
+                <button type="button" class="carousel-btn next" id="next-btn" aria-label="Next slide">❯</button>
+                <button type="button" class="carousel-toggle" id="carousel-toggle" aria-label="Pause carousel" aria-pressed="false">Pause</button>
             </div>
 
-            <!-- Search is handled by the Go server: GET /artists?q=... -->
-            <form action="/artists" method="GET" class="search-form-overlay">
-                <section class="search-bar">
-                    <input type="search" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" required>
-                    <button type="submit" class="search-btn" aria-label="Search artists">Search</button>
-                </section>
+            <form action="/artists" method="GET" class="search-form-overlay" id="artist-search">
+                <div class="search-bar">
+                    <label class="sr-only" for="artist-query">Artist name</label>
+                    <input id="artist-query" type="search" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" required>
+                    <button type="submit" class="search-btn">Search</button>
+                </div>
             </form>
         </section>
 
-        <!-- Minimum artist display required by the MVP -->
-        <section>
+        <section aria-label="Featured artists">
             {{range .Artists}}
             <article>
-                <img src="{{.Image}}" alt="{{.Name}}">
+                <img src="{{.Image}}" alt="Portrait of {{.Name}}">
                 <h2>{{.Name}}</h2>
             </article>
             {{end}}
         </section>
     </main>
 
-    <!-- Footer -->
     {{template "footer" .}}
 
     <script src="/static/JS/home.js"></script>

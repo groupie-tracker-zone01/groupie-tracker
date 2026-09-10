@@ -1,0 +1,65 @@
+.carousel-toggle {
+    position: absolute;
+    left: 50%;
+    bottom: 1rem;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 0.45rem 0.9rem;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+    cursor: pointer;
+    font: inherit;
+}
+
+.carousel-toggle:hover {
+    background: rgba(0, 0, 0, 0.95);
+}
+
+.info-artist h3 {
+    font-size: 1rem;
+    color: hsl(0, 0%, 30%);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 1rem 0 0.4rem;
+}
+
+.no-results a {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 0.8rem;
+    color: #3028b8;
+    text-decoration: underline;
+}
+
+.no-results a:focus-visible {
+    outline: 3px solid #000000;
+    outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+    .carousel-toggle {
+        bottom: 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .info-artist h3 {
+        font-size: 1rem;
+        letter-spacing: 1px;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-toggle {
+        bottom: 0.4rem;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.72rem;
+    }
+
+    .info-artist h3 {
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        margin: 0.3rem 0 0.2rem;
+    }
+}

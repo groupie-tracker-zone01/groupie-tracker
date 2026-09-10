@@ -9,6 +9,35 @@ body {
     min-height: 10vh;
 }
 
+.skip-link {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 2000;
+    padding: 0.6rem 1rem;
+    background: #ffffff;
+    color: #000000;
+    border: 2px solid #000000;
+    border-radius: 0.4rem;
+    transform: translateY(-200%);
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 header {
     top: 0;
     position: sticky;
@@ -25,6 +54,7 @@ nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
     padding: 0.8rem 5%;
     text-decoration: none;
     font-size: 1rem;
@@ -32,50 +62,56 @@ nav {
     box-shadow: 0 5px 5px hsl(0, 0%, 2%);
 }
 
-.title2 {
+.title2,
+.login {
+    flex: 0 0 auto;
     text-decoration: none;
     color: hsl(46, 100%, 38%);
 }
 
 .login {
     transition: 0.3s;
-    text-decoration: none;
-    color: hsl(46, 100%, 38%);
-    padding-left: 3vh;
 }
 
-.login:hover {
-    color: #b50202;
-    border-radius: 5px;
+.login:hover,
+.title2:hover {
+    color: #ff4a4a;
 }
 
-/* ===== Animation - Title ===== */
+nav a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+#carousel:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 3px;
+}
+
 @keyframes MetaRock {
-    0%   { 
-        opacity: 0%; 
+    0% {
+        opacity: 0%;
         transform: translateX(-100px) scale(0.5) rotate(-15deg);
     }
-    25%  { 
-        opacity: 25%; 
+    25% {
+        opacity: 25%;
         transform: translateX(-50px) scale(0.7) rotate(-10deg);
     }
-    50%  { 
-        opacity: 50%; 
+    50% {
+        opacity: 50%;
         transform: translateX(20px) scale(1.1) rotate(5deg);
     }
-    75%  { 
-        opacity: 75%; 
+    75% {
+        opacity: 75%;
         transform: translateX(-10px) scale(0.95) rotate(-3deg);
     }
-    100% { 
-        opacity: 100%; 
-        transform: translateX(0px) scale(1) rotate(0deg);
+    100% {
+        opacity: 100%;
+        transform: translateX(0) scale(1) rotate(0deg);
     }
 }
 
-/* ===== Title's animation ===== */
-
 .title3 {
+    flex: 1 1 auto;
+    min-width: 0;
     font-family: "Metal Mania", system-ui;
     font-weight: 400;
     font-style: normal;
@@ -83,33 +119,44 @@ nav {
     text-shadow: 0 0 10px hsl(46, 100%, 38%), 0 0 10px hsl(46, 100%, 38%), 0 0 10px hsl(46, 100%, 38%);
     color: black;
     text-align: center;
-    width: 100%;
-    display: block; 
+    display: block;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
-
-    /* animation  */
     animation-name: MetaRock;
     animation-duration: 2s;
     animation-fill-mode: forwards;
 }
 
-.logo {
-    position: relative;
-    display: inline;
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
-
 
 @media (max-width: 768px) {
     nav {
-        gap: 0.8rem;
-        padding: 0.5rem 1rem;
+        gap: 0.6rem;
+        padding: 0.5rem 0.75rem;
         font-size: 0.8rem;
     }
 
     .title3 {
         font-size: 1.8rem;
-       padding-left: 4rem;
+    }
+}
+
+@media (max-width: 420px) {
+    nav {
+        font-size: 0.72rem;
+    }
+
+    .title3 {
+        font-size: 1.45rem;
     }
 }
