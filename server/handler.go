@@ -25,15 +25,13 @@ func Routes(templates *template.Template, data *AppData, fullArtists []ArtistFul
 			return
 		}
 		homeData := struct {
-			Title       string
-			Artists     []ArtistFull
-			Suggestions []ArtistFull
-			Query       string
+			Title   string
+			Artists []ArtistFull
+			Query   string
 		}{
-			Title:       "Home - MetaRock",
-			Artists:     []ArtistFull{}, // empty list
-			Suggestions: fullArtists,
-			Query:       "",
+			Title:   "Home - MetaRock",
+			Artists: []ArtistFull{}, // empty list
+			Query:   "",
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		err := templates.ExecuteTemplate(w, "home", homeData)
