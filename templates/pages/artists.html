@@ -8,68 +8,72 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/pages/artists.css?v=4">
-    <link rel="stylesheet" href="/static/css/components/header.css?v=4">
-    <link rel="stylesheet" href="/static/css/components/footer.css?v=4">
+    <link rel="stylesheet" href="/static/css/pages/artists.css?v=5">
+    <link rel="stylesheet" href="/static/css/components/header.css?v=5">
+    <link rel="stylesheet" href="/static/css/components/footer.css?v=5">
     <title>{{.Title}}</title>
 </head>
 
 <body>
-    <!-- Header -->
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     {{template "header" .}}
 
-    {{if .Artists}}
-    <section class="card">
-        <div class="card-artist">
-            <h2 class="title-card">Artist(s) Informations: </h2>
-            {{range .Artists}}
-            <div class="artist-content">
-                <div class="artist-left">
-                    <img src="{{.Image}}" alt="{{.Name}}">
-                    <h4 class="artist-name">{{.Name}}</h4>
-                </div>
-                <div class="info-artist">
-                    <h4>Description: </h4>
-                    <p class="description">Created in {{.CreationDate}} and first album at {{.FirstAlbum}}</p>
-                    <h4>Locations: </h4>
-                    <p class="locations">{{- range $i, $loc := .Locations -}}
-                        {{- if $i}}, {{end -}}
-                        {{- $loc -}}
-                        {{- end -}}</p>
-                    <h4>Show's Dates: </h4>
-                    <p class="dates">
-                        {{- range $i, $date := .Dates -}}
-                        {{- if $i}}, {{end -}}
-                        <span class="date-tag">{{$date}}</span>
-                        {{- end -}}
-                    </p>
-                    <h4>Members: </h4>
-                    <p class="members">{{- range $i, $member := .Members -}}
-                        {{- if $i}}, {{end -}}
-                        {{- $member -}}
-                        {{- end -}}</p>
-                    <h4>Relations: </h4>
-                    <p class="relations">
-                        {{- range .LastConcerts -}}
-                            <strong class="relations-city">{{.City}}:</strong>
-                            {{- range .Dates -}}
-                            <span class="relations-dates-tag">{{.}}</span>
+    <main id="main-content">
+        {{if .Artists}}
+        <section class="card" aria-labelledby="results-title">
+            <div class="card-artist">
+                <h1 class="title-card" id="results-title">Artist information</h1>
+                {{range .Artists}}
+                <article class="artist-content">
+                    <div class="artist-left">
+                        <img src="{{.Image}}" alt="Portrait of {{.Name}}">
+                        <h2 class="artist-name">{{.Name}}</h2>
+                    </div>
+                    <div class="info-artist">
+                        <h3>Description</h3>
+                        <p class="description">Created in {{.CreationDate}} and first album at {{.FirstAlbum}}</p>
+                        <h3>Locations</h3>
+                        <p class="locations">{{- range $i, $loc := .Locations -}}
+                            {{- if $i}}, {{end -}}
+                            {{- $loc -}}
+                            {{- end -}}</p>
+                        <h3>Show dates</h3>
+                        <p class="dates">
+                            {{- range $i, $date := .Dates -}}
+                            {{- if $i}}, {{end -}}
+                            <span class="date-tag">{{$date}}</span>
                             {{- end -}}
-                            <br>
-                        {{- end -}}
-                    </p>
-                </div>
+                        </p>
+                        <h3>Members</h3>
+                        <p class="members">{{- range $i, $member := .Members -}}
+                            {{- if $i}}, {{end -}}
+                            {{- $member -}}
+                            {{- end -}}</p>
+                        <h3>Relations</h3>
+                        <div class="relations">
+                            {{- range .LastConcerts -}}
+                            <p>
+                                <strong class="relations-city">{{.City}}:</strong>
+                                {{- range .Dates -}}
+                                <span class="relations-dates-tag">{{.}}</span>
+                                {{- end -}}
+                            </p>
+                            {{- end -}}
+                        </div>
+                    </div>
+                </article>
+                {{end}}
             </div>
-            {{end}}
-        </div>
-    </section>
-    {{else}}
-    <div class="no-results">
-        <p>No artists found matching "{{.Query}}"</p>
-    </div>
-    {{end}}
+        </section>
+        {{else}}
+        <section class="no-results" aria-live="polite">
+            <h1>No artists found</h1>
+            <p>No artists found matching "{{.Query}}"</p>
+            <a href="/#artist-search">Try another search</a>
+        </section>
+        {{end}}
+    </main>
 
-    <!-- Footer -->
     {{template "footer" .}}
 
     <script src="/static/JS/artists.js"></script>
