@@ -29,6 +29,23 @@ func testTemplates(t *testing.T) *template.Template {
 	return tmpl
 }
 
+func realErrorTemplates(t *testing.T) *template.Template {
+	t.Helper()
+
+	tmpl, err := template.ParseFiles(
+		"../templates/base/footer.html",
+		"../templates/pages/errors/400.html",
+		"../templates/pages/errors/403.html",
+		"../templates/pages/errors/404.html",
+		"../templates/pages/errors/405.html",
+		"../templates/pages/errors/500.html",
+	)
+	if err != nil {
+		t.Fatalf("cannot parse real error templates: %v", err)
+	}
+	return tmpl
+}
+
 func testAppData() (*AppData, []ArtistFull) {
 	data := &AppData{
 		Artists: []Artist{{Id: 1, Name: "Queen"}},
@@ -75,6 +92,35 @@ func TestRoutesHomeAndErrors(t *testing.T) {
 
 			if res.Code != tt.want {
 				t.Fatalf("%s %s returned %d, want %d", tt.method, tt.path, res.Code, tt.want)
+			}
+		})
+	}
+}
+
+func TestRenderErrorsUsesRealTemplates(t *testing.T) {
+	templates := realErrorTemplates(t)
+
+	tests := []struct {
+		status int
+		text   string
+	}{
+		{status: http.StatusBadRequest, text: "Error 400 - Bad Request"},
+		{status: http.StatusForbidden, text: "Error 403 - Forbidden"},
+		{status: http.StatusNotFound, text: "Error 404 - Not Found"},
+		{status: http.StatusMethodNotAllowed, text: "Error 405 - Method Not Allowed"},
+		{status: http.StatusInternalServerError, text: "Error 500 - StatusInternalServerError"},
+	}
+
+	for _, tt := range tests {
+		t.Run(http.StatusText(tt.status), func(t *testing.T) {
+			res := httptest.NewRecorder()
+			renderErrors(res, tt.status, templates)
+
+			if res.Code != tt.status {
+				t.Fatalf("renderErrors returned status %d, want %d", res.Code, tt.status)
+			}
+			if !strings.Contains(res.Body.String(), tt.text) {
+				t.Fatalf("rendered error page does not contain %q: %q", tt.text, res.Body.String())
 			}
 		})
 	}
