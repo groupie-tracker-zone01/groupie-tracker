@@ -33,26 +33,13 @@
                 <button class="carousel-btn next" id="next-btn"> ❯ </button>
             </div>
 
-            <div class="search-form-overlay">
-                <!-- No search JavaScript: this form sends GET /artists?q=... to the Go server. -->
-                <form action="/artists" method="GET" class="search-bar">
-                    <input type="text" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" required>
-                    <button type="submit" class="search-btn">Search</button>
-                </form>
-
-                <div class="search-choice">or choose an artist</div>
-
-                <!-- Native HTML fallback to browse the complete artist list without JavaScript. -->
-                <form action="/artists" method="GET" class="artist-select-bar">
-                    <select name="q" class="artist-select" required>
-                        <option value="" disabled selected>Choose an artist...</option>
-                        {{range .Suggestions}}
-                        <option value="{{.Name}}">{{.Name}}</option>
-                        {{end}}
-                    </select>
-                    <button type="submit" class="select-btn">View</button>
-                </form>
-            </div>
+            <!-- Search is handled by the Go server: GET /artists?q=... -->
+            <form action="/artists" method="GET" class="search-form-overlay">
+                <section class="search-bar">
+                    <input type="search" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" required>
+                    <button type="submit" class="search-btn" aria-label="Search artists">Search</button>
+                </section>
+            </form>
         </section>
 
         <!-- Minimum artist display required by the MVP -->
