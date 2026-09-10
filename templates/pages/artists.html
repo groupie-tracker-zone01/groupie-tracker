@@ -52,14 +52,16 @@
                     <p class="relations">
                         {{- range .LastConcerts -}}
                             <strong class="relations-city">{{.City}}:</strong>
-                            <span class="relations-dates-tag">{{.LastDate}}</span>
+                            {{- range .Dates -}}
+                            <span class="relations-dates-tag">{{.}}</span>
+                            {{- end -}}
                             <br>
                         {{- end -}}
                     </p>
                 </div>
             </div>
+            {{end}}
         </div>
-        {{end}}
     </section>
     {{else}}
     <div class="no-results">
