@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -33,12 +34,7 @@ func Routes(templates *template.Template, data *AppData, fullArtists []ArtistFul
 			Artists: []ArtistFull{}, // empty list
 			Query:   "",
 		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		err := templates.ExecuteTemplate(w, "home", homeData)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Println(err)
-		}
+		renderPage(w, templates, "home", homeData)
 	})
 	// Artists Page //
 	mux.HandleFunc("/artists", func(w http.ResponseWriter, r *http.Request) {
@@ -108,12 +104,7 @@ func searchArtists(w http.ResponseWriter, r *http.Request, templates *template.T
 		Artists: artistsToShow,
 		Query:   query,
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err := templates.ExecuteTemplate(w, "artists", artistData)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err)
-	}
+	renderPage(w, templates, "artists", artistData)
 }
 
 func handleSearch(w http.ResponseWriter, r *http.Request, fullArtists []ArtistFull, templates *template.Template) {
@@ -138,8 +129,21 @@ func handleSearch(w http.ResponseWriter, r *http.Request, fullArtists []ArtistFu
 	json.NewEncoder(w).Encode(results)
 }
 
+func renderPage(w http.ResponseWriter, templates *template.Template, templateName string, data any) {
+	var buffer bytes.Buffer
+	if err := templates.ExecuteTemplate(&buffer, templateName, data); err != nil {
+		log.Println(err)
+		renderErrors(w, http.StatusInternalServerError, templates)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if _, err := w.Write(buffer.Bytes()); err != nil {
+		log.Println(err)
+	}
+}
+
 func renderErrors(w http.ResponseWriter, status int, templates *template.Template) {
-	w.WriteHeader(status)
 	var templateName string
 	switch status {
 	case http.StatusBadRequest:
@@ -155,9 +159,16 @@ func renderErrors(w http.ResponseWriter, status int, templates *template.Templat
 	default:
 		templateName = "home"
 	}
-	err := templates.ExecuteTemplate(w, templateName, nil)
-	if err != nil {
+
+	var buffer bytes.Buffer
+	if err := templates.ExecuteTemplate(&buffer, templateName, nil); err != nil {
 		http.Error(w, http.StatusText(status), status)
 		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
+	if _, err := w.Write(buffer.Bytes()); err != nil {
+		log.Println(err)
 	}
 }
