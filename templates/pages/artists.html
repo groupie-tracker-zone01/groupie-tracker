@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/pages/artists.css?v=5">
+    <link rel="stylesheet" href="/static/css/pages/artists.css?v=6">
     <link rel="stylesheet" href="/static/css/components/header.css?v=5">
     <link rel="stylesheet" href="/static/css/components/footer.css?v=5">
     <link rel="stylesheet" href="/static/css/components/accessibility.css?v=1">
@@ -20,11 +20,38 @@
     {{template "header" .}}
 
     <main id="main-content">
-        {{if .Artists}}
-        <section class="card" aria-labelledby="results-title">
+        <section class="results-search-shell" aria-label="Artist search">
+            <form action="/artists" method="GET" class="results-search-form">
+                <label class="sr-only" for="results-query">Search artists, members, locations or dates</label>
+                <div class="results-search-bar">
+                    <input id="results-query" type="search" name="q" class="results-search-input"
+                        list="artist-suggestions" placeholder="Search artist, member, location or date..."
+                        maxlength="60" autocomplete="off" value="{{.Query}}" required>
+                    <button type="submit" class="results-search-button">Search</button>
+                </div>
+            </form>
+            <datalist id="artist-suggestions">
+                {{range .Suggestions}}
+                <option value="{{.Name}}" label="Artist"></option>
+                {{range .Members}}
+                <option value="{{.}}" label="Member"></option>
+                {{end}}
+                {{range .Locations}}
+                <option value="{{.}}" label="Location"></option>
+                {{end}}
+                <option value="{{.CreationDate}}" label="Creation date"></option>
+                <option value="{{.FirstAlbum}}" label="First album"></option>
+                {{end}}
+            </datalist>
+        </section>
+
+        {{with .SelectedArtist}}
+        <section class="card artist-detail-card" aria-labelledby="artist-detail-title">
             <div class="card-artist">
-                <h1 class="title-card" id="results-title">Artist information</h1>
-                {{range .Artists}}
+                <div class="detail-heading">
+                    <a class="back-results" href="/#artist-search">← New search</a>
+                    <h1 class="title-card" id="artist-detail-title">Artist information</h1>
+                </div>
                 <article class="artist-content">
                     <div class="artist-left">
                         <img src="{{.Image}}" alt="Portrait of {{.Name}}">
@@ -63,15 +90,62 @@
                         </div>
                     </div>
                 </article>
-                {{end}}
             </div>
         </section>
         {{else}}
-        <section class="no-results" aria-live="polite">
-            <h1>No artists found</h1>
-            <p>No artists found matching "{{.Query}}"</p>
-            <a href="/#artist-search">Try another search</a>
-        </section>
+            {{if .Artists}}
+            <section class="results-panel" aria-labelledby="results-title">
+                <div class="results-heading">
+                    <div>
+                        <h1 id="results-title">Search results</h1>
+                        <p>{{.TotalResults}} artist(s) found for “{{.Query}}”</p>
+                    </div>
+                    <form action="/artists" method="GET" class="results-limit-form">
+                        <input type="hidden" name="q" value="{{.Query}}">
+                        <label for="results-limit">Results per page</label>
+                        <select id="results-limit" name="limit">
+                            <option value="5" {{if eq .Limit 5}}selected{{end}}>5</option>
+                            <option value="10" {{if eq .Limit 10}}selected{{end}}>10</option>
+                            <option value="25" {{if eq .Limit 25}}selected{{end}}>25</option>
+                        </select>
+                        <button type="submit">Apply</button>
+                    </form>
+                </div>
+
+                <div class="artist-grid">
+                    {{range .Artists}}
+                    <article class="artist-result-card">
+                        <a href="/artist?id={{.Id}}" aria-label="View {{.Name}} details">
+                            <img src="{{.Image}}" alt="Portrait of {{.Name}}">
+                            <h2>{{.Name}}</h2>
+                        </a>
+                    </article>
+                    {{end}}
+                </div>
+
+                {{if .Pages}}
+                <nav class="pagination" aria-label="Search results pages">
+                    {{if .PrevURL}}<a class="pagination-nav" href="{{.PrevURL}}">← Previous</a>{{end}}
+                    <div class="pagination-pages">
+                        {{range .Pages}}
+                            {{if .Current}}
+                            <span class="pagination-page current" aria-current="page">{{.Number}}</span>
+                            {{else}}
+                            <a class="pagination-page" href="{{.URL}}">{{.Number}}</a>
+                            {{end}}
+                        {{end}}
+                    </div>
+                    {{if .NextURL}}<a class="pagination-nav" href="{{.NextURL}}">Next →</a>{{end}}
+                </nav>
+                {{end}}
+            </section>
+            {{else}}
+            <section class="no-results" aria-live="polite">
+                <h1>No artists found</h1>
+                <p>No artists found matching "{{.Query}}"</p>
+                <a href="/#artist-search">Try another search</a>
+            </section>
+            {{end}}
         {{end}}
     </main>
 

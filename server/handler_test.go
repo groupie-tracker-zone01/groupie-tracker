@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"encoding/json"
 	"html/template"
 	"net/http"
@@ -14,7 +15,7 @@ func testTemplates(t *testing.T) *template.Template {
 
 	const source = `
 {{define "home"}}HOME{{range .Artists}} {{.Name}} {{.Image}}{{end}}{{end}}
-{{define "artists"}}ARTISTS{{range .Artists}} {{.Name}}{{end}}{{end}}
+{{define "artists"}}ARTISTS{{range .Artists}} {{.Name}}{{end}}{{with .SelectedArtist}} DETAIL {{.Name}}{{end}}{{end}}
 {{define "400"}}BAD REQUEST{{end}}
 {{define "403"}}FORBIDDEN{{end}}
 {{define "404"}}NOT FOUND{{end}}
@@ -209,6 +210,55 @@ func TestArtistsSearch(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestArtistsPaginationAndDetail(t *testing.T) {
+	data := &AppData{}
+	fullArtists := make([]ArtistFull, 0, 12)
+	for i := 1; i <= 12; i++ {
+		fullArtists = append(fullArtists, ArtistFull{Id: i, Name: fmt.Sprintf("Band%02d", i)})
+	}
+	handler := Routes(testTemplates(t), data, fullArtists)
+
+	t.Run("second page with five results", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, "/artists?q=Band&limit=5&page=2", nil))
+
+		if res.Code != http.StatusOK {
+			t.Fatalf("got status %d, want %d", res.Code, http.StatusOK)
+		}
+		body := res.Body.String()
+		for _, expected := range []string{"Band06", "Band07", "Band08", "Band09", "Band10"} {
+			if !strings.Contains(body, expected) {
+				t.Fatalf("page 2 does not contain %q: %q", expected, body)
+			}
+		}
+		for _, unexpected := range []string{"Band01", "Band05", "Band11", "Band12"} {
+			if strings.Contains(body, unexpected) {
+				t.Fatalf("page 2 unexpectedly contains %q: %q", unexpected, body)
+			}
+		}
+	})
+
+	t.Run("detail route selects one artist", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, "/artist?id=7", nil))
+
+		if res.Code != http.StatusOK {
+			t.Fatalf("got status %d, want %d", res.Code, http.StatusOK)
+		}
+		if !strings.Contains(res.Body.String(), "DETAIL Band07") {
+			t.Fatalf("detail page does not contain selected artist: %q", res.Body.String())
+		}
+	})
+
+	t.Run("unknown artist returns 404", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, "/artist?id=99", nil))
+		if res.Code != http.StatusNotFound {
+			t.Fatalf("got status %d, want %d", res.Code, http.StatusNotFound)
+		}
+	})
 }
 
 func TestAPIRoutesUseControlledData(t *testing.T) {

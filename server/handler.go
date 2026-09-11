@@ -7,8 +7,29 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 )
+
+
+type paginationLink struct {
+	Number  int
+	URL     string
+	Current bool
+}
+
+type artistsPageData struct {
+	Title          string
+	Query          string
+	Suggestions    []ArtistFull
+	Artists        []ArtistFull
+	SelectedArtist *ArtistFull
+	Limit          int
+	TotalResults   int
+	Pages          []paginationLink
+	PrevURL        string
+	NextURL        string
+}
 
 func Routes(templates *template.Template, data *AppData, fullArtists []ArtistFull) http.Handler {
 	mux := http.NewServeMux()
@@ -41,6 +62,9 @@ func Routes(templates *template.Template, data *AppData, fullArtists []ArtistFul
 	// Artists Page //
 	mux.HandleFunc("/artists", func(w http.ResponseWriter, r *http.Request) {
 		searchArtists(w, r, templates, fullArtists)
+	})
+	mux.HandleFunc("/artist", func(w http.ResponseWriter, r *http.Request) {
+		artistDetails(w, r, templates, fullArtists)
 	})
 	// API Routes
 	mux.HandleFunc("/api/artists", func(w http.ResponseWriter, r *http.Request) {
@@ -78,16 +102,113 @@ func searchArtists(w http.ResponseWriter, r *http.Request, templates *template.T
 		return
 	}
 
-	artistData := struct {
-		Title   string
-		Artists []ArtistFull
-		Query   string
-	}{
-		Title:   "Artists - MetaRock",
-		Artists: filterArtists(fullArtists, query),
-		Query:   query,
+	filtered := filterArtists(fullArtists, query)
+	limit := resultLimit(r.URL.Query().Get("limit"))
+	page := positiveInt(r.URL.Query().Get("page"), 1)
+	totalResults := len(filtered)
+	totalPages := 0
+	if totalResults > 0 {
+		totalPages = (totalResults + limit - 1) / limit
+		if page > totalPages {
+			page = totalPages
+		}
 	}
-	renderPage(w, templates, "artists", artistData)
+
+	start := (page - 1) * limit
+	end := start + limit
+	if end > totalResults {
+		end = totalResults
+	}
+
+	visibleArtists := []ArtistFull{}
+	if start >= 0 && start < totalResults {
+		visibleArtists = filtered[start:end]
+	}
+
+	data := artistsPageData{
+		Title:        "Artists - MetaRock",
+		Query:        query,
+		Suggestions:  fullArtists,
+		Artists:      visibleArtists,
+		Limit:        limit,
+		TotalResults: totalResults,
+	}
+
+	for pageNumber := 1; pageNumber <= totalPages; pageNumber++ {
+		data.Pages = append(data.Pages, paginationLink{
+			Number:  pageNumber,
+			URL:     resultsURL(query, limit, pageNumber),
+			Current: pageNumber == page,
+		})
+	}
+	if page > 1 {
+		data.PrevURL = resultsURL(query, limit, page-1)
+	}
+	if page < totalPages {
+		data.NextURL = resultsURL(query, limit, page+1)
+	}
+
+	renderPage(w, templates, "artists", data)
+}
+
+func artistDetails(w http.ResponseWriter, r *http.Request, templates *template.Template, fullArtists []ArtistFull) {
+	if r.Method != http.MethodGet {
+		renderErrors(w, http.StatusMethodNotAllowed, templates)
+		return
+	}
+
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id <= 0 {
+		renderErrors(w, http.StatusBadRequest, templates)
+		return
+	}
+
+	var selected *ArtistFull
+	for i := range fullArtists {
+		if fullArtists[i].Id == id {
+			selected = &fullArtists[i]
+			break
+		}
+	}
+	if selected == nil {
+		renderErrors(w, http.StatusNotFound, templates)
+		return
+	}
+
+	data := artistsPageData{
+		Title:          selected.Name + " - MetaRock",
+		Suggestions:    fullArtists,
+		SelectedArtist: selected,
+		Limit:          5,
+	}
+	renderPage(w, templates, "artists", data)
+}
+
+func resultLimit(value string) int {
+	switch value {
+	case "10":
+		return 10
+	case "25":
+		return 25
+	default:
+		return 5
+	}
+}
+
+func positiveInt(value string, fallback int) int {
+	parsed, err := strconv.Atoi(value)
+	if err != nil || parsed < 1 {
+		return fallback
+	}
+	return parsed
+}
+
+func resultsURL(query string, limit, page int) string {
+	values := url.Values{}
+	values.Set("q", query)
+	values.Set("limit", strconv.Itoa(limit))
+	values.Set("page", strconv.Itoa(page))
+	return "/artists?" + values.Encode()
 }
 
 func handleSearch(w http.ResponseWriter, r *http.Request, fullArtists []ArtistFull, templates *template.Template) {

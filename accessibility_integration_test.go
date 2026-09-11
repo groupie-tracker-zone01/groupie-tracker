@@ -61,12 +61,34 @@ func TestFinalRecipeAccessibleStructure(t *testing.T) {
 		for _, expected := range []string{
 			`class="skip-link" href="#main-content"`,
 			`id="main-content"`,
-			`<h1 class="title-card" id="results-title">Artist information</h1>`,
+			`<h1 id="results-title">Search results</h1>`,
+			`class="artist-result-card"`,
+			`href="/artist?id=1"`,
+			`alt="Portrait of Queen"`,
+			`id="results-limit"`,
+		} {
+			if !strings.Contains(body, expected) {
+				t.Fatalf("artists page does not contain accessibility marker %q", expected)
+			}
+		}
+	})
+
+	t.Run("artist detail keeps accessible structure", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, "/artist?id=1", nil))
+
+		if res.Code != http.StatusOK {
+			t.Fatalf("GET /artist?id=1 returned %d, want %d", res.Code, http.StatusOK)
+		}
+
+		body := res.Body.String()
+		for _, expected := range []string{
+			`id="artist-detail-title"`,
 			`<h2 class="artist-name">Queen</h2>`,
 			`alt="Portrait of Queen"`,
 		} {
 			if !strings.Contains(body, expected) {
-				t.Fatalf("artists page does not contain accessibility marker %q", expected)
+				t.Fatalf("artist detail does not contain accessibility marker %q", expected)
 			}
 		}
 	})
