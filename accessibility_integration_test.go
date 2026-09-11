@@ -37,6 +37,9 @@ func TestFinalRecipeAccessibleStructure(t *testing.T) {
 			`id="main-content"`,
 			`for="artist-query"`,
 			`id="artist-query"`,
+			`data-search-widget`,
+			`id="home-search-suggestions"`,
+			`aria-controls="home-search-suggestions"`,
 			`id="carousel-toggle"`,
 			`aria-label="Previous slide"`,
 			`aria-label="Next slide"`,
@@ -66,6 +69,9 @@ func TestFinalRecipeAccessibleStructure(t *testing.T) {
 			`href="/artist?id=1"`,
 			`alt="Portrait of Queen"`,
 			`id="results-limit"`,
+			`id="results-search-suggestions"`,
+			`aria-controls="results-search-suggestions"`,
+			`/static/JS/search.js`,
 		} {
 			if !strings.Contains(body, expected) {
 				t.Fatalf("artists page does not contain accessibility marker %q", expected)
