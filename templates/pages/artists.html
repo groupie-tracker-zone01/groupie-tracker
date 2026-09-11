@@ -9,10 +9,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/pages/artists.css?v=8">
+    <link rel="stylesheet" href="/static/css/pages/artists.css?v=9">
     <link rel="stylesheet" href="/static/css/components/header.css?v=5">
     <link rel="stylesheet" href="/static/css/components/footer.css?v=5">
     <link rel="stylesheet" href="/static/css/components/accessibility.css?v=1">
+    <link rel="stylesheet" href="/static/css/components/search-dropdown.css?v=1">
     <title>{{.Title}}</title>
 </head>
 
@@ -24,26 +25,54 @@
         <section class="results-search-shell" aria-label="Artist search">
             <form action="/artists" method="GET" class="results-search-form">
                 <label class="sr-only" for="results-query">Search artists, members, locations or dates</label>
-                <div class="results-search-bar">
+                <div class="results-search-bar search-widget" data-search-widget>
                     <input id="results-query" type="search" name="q" class="results-search-input"
-                        list="artist-suggestions" placeholder="Search artist, member, location or date..."
-                        maxlength="60" autocomplete="off" value="{{.Query}}" required>
+                        placeholder="Search artist, member, location or date..."
+                        maxlength="60" autocomplete="off" value="{{.Query}}" required
+                        aria-controls="results-search-suggestions" aria-expanded="false" aria-autocomplete="list">
                     <button type="submit" class="results-search-button">Search</button>
+
+                    <ul class="dropdown-results" id="results-search-suggestions"
+                        aria-label="Search suggestions" hidden>
+                        {{range .Suggestions}}
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.Name}}">
+                                <span class="dropdown-value">{{.Name}}</span>
+                                <span class="dropdown-subtitle">Artist</span>
+                            </button>
+                        </li>
+                        {{range .Members}}
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.}}">
+                                <span class="dropdown-value">{{.}}</span>
+                                <span class="dropdown-subtitle">Member</span>
+                            </button>
+                        </li>
+                        {{end}}
+                        {{range .DisplayLocations}}
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.}}">
+                                <span class="dropdown-value">{{.}}</span>
+                                <span class="dropdown-subtitle">Location</span>
+                            </button>
+                        </li>
+                        {{end}}
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.CreationDate}}">
+                                <span class="dropdown-value">{{.CreationDate}}</span>
+                                <span class="dropdown-subtitle">Creation date</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.FirstAlbum}}">
+                                <span class="dropdown-value">{{.FirstAlbum}}</span>
+                                <span class="dropdown-subtitle">First album</span>
+                            </button>
+                        </li>
+                        {{end}}
+                    </ul>
                 </div>
             </form>
-            <datalist id="artist-suggestions">
-                {{range .Suggestions}}
-                <option value="{{.Name}}" label="Artist"></option>
-                {{range .Members}}
-                <option value="{{.}}" label="Member"></option>
-                {{end}}
-                {{range .DisplayLocations}}
-                <option value="{{.}}" label="Location"></option>
-                {{end}}
-                <option value="{{.CreationDate}}" label="Creation date"></option>
-                <option value="{{.FirstAlbum}}" label="First album"></option>
-                {{end}}
-            </datalist>
         </section>
 
         {{with .SelectedArtist}}
