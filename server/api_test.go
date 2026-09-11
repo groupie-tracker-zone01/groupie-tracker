@@ -132,18 +132,17 @@ func TestGetArtistFull(t *testing.T) {
 	}
 }
 
-
 func TestFormatLocation(t *testing.T) {
-	tests := map[string]string{
-		"nagoya-japan":        "Nagoya, Japan",
-		"los_angeles-usa":     "Los Angeles, USA",
-		"london-uk":           "London, UK",
-		"arc-en-ciel-france":  "Arc-En-Ciel, France",
+	if got := formatLocation("nagoya-japan"); got != "Nagoya, Japan" {
+		t.Fatalf("formatLocation(nagoya-japan) = %q", got)
 	}
-
-	for input, want := range tests {
-		if got := formatLocation(input); got != want {
-			t.Fatalf("formatLocation(%q) = %q, want %q", input, got, want)
-		}
+	if got := formatLocation("los_angeles-usa"); got != "Los Angeles, USA" {
+		t.Fatalf("formatLocation(los_angeles-usa) = %q", got)
+	}
+	if got := formatLocation("london-uk"); got != "London, UK" {
+		t.Fatalf("formatLocation(london-uk) = %q", got)
+	}
+	if got := formatLocation("arc-en-ciel-france"); got != "Arc-En-Ciel, France" {
+		t.Fatalf("formatLocation(arc-en-ciel-france) = %q", got)
 	}
 }

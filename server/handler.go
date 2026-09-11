@@ -3,14 +3,13 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"strconv"
 	"html/template"
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
-
 
 type paginationLink struct {
 	Number  int

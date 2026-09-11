@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-	"unicode"
 	"time"
+	"unicode"
 )
 
 type Artist struct {
@@ -66,17 +66,17 @@ type LastConcert struct {
 
 // Structure type to store all the data of an artist
 type ArtistFull struct {
-	Id           int                 `json:"id"`
-	Image        string              `json:"image"`
-	Name         string              `json:"name"`
-	Members      []string            `json:"members"`
-	CreationDate int                 `json:"creationDate"`
-	FirstAlbum   string              `json:"firstAlbum"`
+	Id               int                 `json:"id"`
+	Image            string              `json:"image"`
+	Name             string              `json:"name"`
+	Members          []string            `json:"members"`
+	CreationDate     int                 `json:"creationDate"`
+	FirstAlbum       string              `json:"firstAlbum"`
 	Locations        []string            `json:"locations"`
 	DisplayLocations []string            `json:"-"`
 	Dates            []string            `json:"dates"`
-	Relations    map[string][]string `json:"relations"`
-	LastConcerts []LastConcert       `json:"lastConcerts"`
+	Relations        map[string][]string `json:"relations"`
+	LastConcerts     []LastConcert       `json:"lastConcerts"`
 }
 
 const (
