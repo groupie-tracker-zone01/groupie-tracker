@@ -376,6 +376,7 @@ main::-webkit-scrollbar-thumb {
     min-width: 0;
     border: 0;
     outline: 0;
+    color-scheme: light;
     background: transparent;
     padding: clamp(0.65rem, 1.5vw, 1rem) clamp(1rem, 2.5vw, 1.5rem);
     font: inherit;
@@ -493,9 +494,10 @@ main::-webkit-scrollbar-thumb {
     padding: 0.75rem;
     text-align: center;
     font-size: clamp(1rem, 2vw, 1.35rem);
-    font-weight: 400;
-    color: hsl(46, 100%, 32%);
-    text-shadow: 1px 1px 1px #111;
+    font-weight: 500;
+    color: #111;
+    background: #fff;
+    text-shadow: none;
 }
 
 .pagination {
