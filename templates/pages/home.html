@@ -36,10 +36,26 @@
 
             <form action="/artists" method="GET" class="search-form-overlay" id="artist-search">
                 <div class="search-bar">
-                    <label class="sr-only" for="artist-query">Artist name</label>
-                    <input id="artist-query" type="search" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" required>
+                    <label class="sr-only" for="artist-query">Search artists, members, locations or dates</label>
+                    <input id="artist-query" type="search" name="q" class="search"
+                        list="artist-suggestions"
+                        placeholder="Search artist, member, location or date..."
+                        maxlength="60" autocomplete="off" value="{{.Query}}" required>
                     <button type="submit" class="search-btn">Search</button>
                 </div>
+                <datalist id="artist-suggestions">
+                    {{range .Suggestions}}
+                    <option value="{{.Name}}" label="Artist"></option>
+                    {{range .Members}}
+                    <option value="{{.}}" label="Member"></option>
+                    {{end}}
+                    {{range .Locations}}
+                    <option value="{{.}}" label="Location"></option>
+                    {{end}}
+                    <option value="{{.CreationDate}}" label="Creation date"></option>
+                    <option value="{{.FirstAlbum}}" label="First album"></option>
+                    {{end}}
+                </datalist>
             </form>
         </section>
 

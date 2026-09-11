@@ -3,7 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"strconv"
 	"html/template"
 	"log"
 	"net/http"
@@ -26,13 +26,15 @@ func Routes(templates *template.Template, data *AppData, fullArtists []ArtistFul
 			return
 		}
 		homeData := struct {
-			Title   string
-			Artists []ArtistFull
-			Query   string
+			Title       string
+			Artists     []ArtistFull
+			Suggestions []ArtistFull
+			Query       string
 		}{
-			Title:   "Home - MetaRock",
-			Artists: []ArtistFull{}, // empty list
-			Query:   "",
+			Title:       "Home - MetaRock",
+			Artists:     []ArtistFull{},
+			Suggestions: fullArtists,
+			Query:       "",
 		}
 		renderPage(w, templates, "home", homeData)
 	})
@@ -63,70 +65,92 @@ func Routes(templates *template.Template, data *AppData, fullArtists []ArtistFul
 	return mux
 }
 
-// Searches artists whose name contains the expression passed in the http request and displays them on the page if they are found.
+// Searches artists across the fields required by the search-bar exercise.
 func searchArtists(w http.ResponseWriter, r *http.Request, templates *template.Template, fullArtists []ArtistFull) {
 	if r.Method != http.MethodGet {
 		renderErrors(w, http.StatusMethodNotAllowed, templates)
 		return
 	}
-	query := r.URL.Query().Get("q")
-	query = strings.TrimSpace(query)
+
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
 	if query == "" {
 		renderErrors(w, http.StatusBadRequest, templates)
 		return
 	}
-	artistsToShow := fullArtists
-	if query != "" {
-		queryLower := strings.ToLower(query)
-		var filtered []ArtistFull
-		for _, artist := range fullArtists {
-			nameLower := strings.ToLower(artist.Name)
-			if nameLower == queryLower {
-				filtered = []ArtistFull{artist}
-				break
-			}
-			if strings.Contains(strings.ToLower(artist.Name), queryLower) {
-				filtered = append(filtered, artist)
-				continue
-			}
-			if len(filtered) >= 20 {
-				break
-			}
-		}
-		artistsToShow = filtered
-	}
+
 	artistData := struct {
 		Title   string
 		Artists []ArtistFull
 		Query   string
 	}{
 		Title:   "Artists - MetaRock",
-		Artists: artistsToShow,
+		Artists: filterArtists(fullArtists, query),
 		Query:   query,
 	}
 	renderPage(w, templates, "artists", artistData)
 }
 
 func handleSearch(w http.ResponseWriter, r *http.Request, fullArtists []ArtistFull, templates *template.Template) {
-	query := r.URL.Query().Get("q")
-	query = strings.ToLower(strings.TrimSpace(query))
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
 	if query == "" {
 		renderErrors(w, http.StatusBadRequest, templates)
 		return
 	}
+
 	var results []string
-	for _, artist := range fullArtists {
-		if strings.Contains(strings.ToLower(artist.Name), query) {
-			results = append(results, artist.Name)
-			continue
-		}
+	for _, artist := range filterArtists(fullArtists, query) {
+		results = append(results, artist.Name)
 		if len(results) >= 10 {
 			break
 		}
 	}
-	fmt.Println(results)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
+}
+
+func filterArtists(fullArtists []ArtistFull, query string) []ArtistFull {
+	var filtered []ArtistFull
+	for _, artist := range fullArtists {
+		if artistMatchesQuery(artist, query) {
+			filtered = append(filtered, artist)
+		}
+	}
+	return filtered
+}
+
+func artistMatchesQuery(artist ArtistFull, query string) bool {
+	query = normalizeSearchText(query)
+	if query == "" {
+		return false
+	}
+
+	if strings.Contains(normalizeSearchText(artist.Name), query) {
+		return true
+	}
+	if strings.Contains(strconv.Itoa(artist.CreationDate), query) {
+		return true
+	}
+	if strings.Contains(normalizeSearchText(artist.FirstAlbum), query) {
+		return true
+	}
+	for _, member := range artist.Members {
+		if strings.Contains(normalizeSearchText(member), query) {
+			return true
+		}
+	}
+	for _, location := range artist.Locations {
+		if strings.Contains(normalizeSearchText(location), query) {
+			return true
+		}
+	}
+	return false
+}
+
+func normalizeSearchText(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	value = strings.NewReplacer("_", " ", "-", " ").Replace(value)
+	return strings.Join(strings.Fields(value), " ")
 }
 
 func renderPage(w http.ResponseWriter, templates *template.Template, templateName string, data any) {
