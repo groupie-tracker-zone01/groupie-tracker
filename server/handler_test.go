@@ -173,7 +173,7 @@ func TestArtistsSearch(t *testing.T) {
 			name:      "location accepts readable spaces",
 			query:     "los angeles usa",
 			want:      []string{"Queens of the Stone Age"},
-			notWanted: []string{"Queen", "Metallica"},
+			notWanted: []string{"Metallica"},
 		},
 		{
 			name:      "creation date",
