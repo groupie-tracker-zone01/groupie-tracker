@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
+	"unicode"
 	"time"
 )
 
@@ -57,8 +59,9 @@ type AppData struct {
 
 // Relations
 type LastConcert struct {
-	City  string
-	Dates []string
+	City        string
+	DisplayCity string
+	Dates       []string
 }
 
 // Structure type to store all the data of an artist
@@ -69,8 +72,9 @@ type ArtistFull struct {
 	Members      []string            `json:"members"`
 	CreationDate int                 `json:"creationDate"`
 	FirstAlbum   string              `json:"firstAlbum"`
-	Locations    []string            `json:"locations"`
-	Dates        []string            `json:"dates"`
+	Locations        []string            `json:"locations"`
+	DisplayLocations []string            `json:"-"`
+	Dates            []string            `json:"dates"`
 	Relations    map[string][]string `json:"relations"`
 	LastConcerts []LastConcert       `json:"lastConcerts"`
 }
@@ -136,6 +140,64 @@ func sortDates(dates []string) []string {
 	return sorted
 }
 
+func formatLocations(locations []string) []string {
+	formatted := make([]string, 0, len(locations))
+	for _, location := range locations {
+		formatted = append(formatted, formatLocation(location))
+	}
+	return formatted
+}
+
+func formatLocation(location string) string {
+	location = strings.TrimSpace(strings.ReplaceAll(location, "_", " "))
+	if location == "" {
+		return ""
+	}
+
+	city := location
+	country := ""
+	if separator := strings.LastIndex(location, "-"); separator > 0 && separator < len(location)-1 {
+		city = location[:separator]
+		country = location[separator+1:]
+	}
+
+	city = titleWords(city)
+	if country == "" {
+		return city
+	}
+
+	country = strings.TrimSpace(country)
+	switch strings.ToLower(country) {
+	case "usa", "uk":
+		country = strings.ToUpper(country)
+	default:
+		country = titleWords(country)
+	}
+
+	return city + ", " + country
+}
+
+func titleWords(value string) string {
+	words := strings.Fields(value)
+	for i, word := range words {
+		parts := strings.Split(word, "-")
+		for j, part := range parts {
+			parts[j] = capitalizeWord(part)
+		}
+		words[i] = strings.Join(parts, "-")
+	}
+	return strings.Join(words, " ")
+}
+
+func capitalizeWord(value string) string {
+	runes := []rune(strings.ToLower(value))
+	if len(runes) == 0 {
+		return ""
+	}
+	runes[0] = unicode.ToUpper(runes[0])
+	return string(runes)
+}
+
 func GetFullArtists(data *AppData) []ArtistFull {
 	var fullArtists []ArtistFull
 	for _, artist := range data.Artists {
@@ -152,6 +214,7 @@ func GetFullArtists(data *AppData) []ArtistFull {
 			if loc.Id == artist.Id {
 				full.Locations = loc.Locations
 				sort.Strings(full.Locations)
+				full.DisplayLocations = formatLocations(full.Locations)
 				break
 			}
 		}
@@ -171,8 +234,9 @@ func GetFullArtists(data *AppData) []ArtistFull {
 			if len(dates) > 0 {
 				sortedDates := sortDates(dates)
 				full.LastConcerts = append(full.LastConcerts, LastConcert{
-					City:  city,
-					Dates: sortedDates,
+					City:        city,
+					DisplayCity: formatLocation(city),
+					Dates:       sortedDates,
 				})
 			}
 		}
@@ -205,6 +269,7 @@ func GetArtistFull(data *AppData, artistId int) *ArtistFull {
 				if loc.Id == artistId {
 					full.Locations = loc.Locations
 					sort.Strings(full.Locations)
+					full.DisplayLocations = formatLocations(full.Locations)
 					break
 				}
 			}
@@ -224,8 +289,9 @@ func GetArtistFull(data *AppData, artistId int) *ArtistFull {
 				if len(dates) > 0 {
 					sortedDates := sortDates(dates)
 					full.LastConcerts = append(full.LastConcerts, LastConcert{
-						City:  city,
-						Dates: sortedDates,
+						City:        city,
+						DisplayCity: formatLocation(city),
+						Dates:       sortedDates,
 					})
 				}
 			}

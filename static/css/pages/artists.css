@@ -142,50 +142,54 @@ main {
 .locations,
 .members,
 .date-tag,
+.date-tag,
 .relations-dates-tag {
-    display: inline-block;
-    padding: 0.3rem 1rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    transition: transform 0.2s;
-}
-
-.description:hover,
-.locations:hover,
-.members:hover,
-.date-tag:hover,
-.relations-dates-tag:hover {
-    transform: scale(1.05);
-}
-
-.relations-dates-tag {
-   background-color: #333;
+    background-color: #333;
     color: #fff;
-    padding: 4px 8px;
-    border-radius: 20px;
+    border-radius: 999px;
     display: inline-block;
-    margin: 2px;
-    font-size: 14px;
-    box-shadow:  1px 1px 1px black,
-        1px -1px 0 black,
-        -1px  1px 0 black,
-        2px  5px 0 black;;
+    margin: clamp(0.1rem, 0.2vw, 0.2rem);
+    padding: clamp(0.3rem, 0.5vw, 0.45rem) clamp(0.55rem, 0.9vw, 0.8rem);
+    font-size: clamp(0.78rem, 1.1vw, 0.9rem);
+    box-shadow:
+        0 clamp(0.12rem, 0.35vw, 0.3rem)
+        clamp(0.25rem, 0.7vw, 0.6rem)
+        rgba(0, 0, 0, 0.42);
+}
+
+.locations {
+    line-height: 1.7;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.relations {
+    display: grid;
+    gap: clamp(0.55rem, 1.2vw, 0.9rem);
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.relations p {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: clamp(0.3rem, 0.7vw, 0.55rem);
+    margin: 0;
+    padding: clamp(0.6rem, 1.2vw, 0.9rem);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: clamp(0.7rem, 1.3vw, 1rem);
+    background: rgba(255, 255, 255, 0.66);
 }
 
 .relations-city {
-    background: none !important;
-    border: none !important;
-    color: inherit;
-    font-weight: 100;
-    margin-right: 5px;
-    padding: 0;
-    display: inline;
-    text-shadow: 
-        1px 1px 1px black,
-        1px -1px 0 black,
-        -1px  1px 0 black,
-        2px  2px 0 black;
-
+    min-width: min(100%, 12rem);
+    color: #161616;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+    text-shadow: none;
 }
 
 /* Research failed */

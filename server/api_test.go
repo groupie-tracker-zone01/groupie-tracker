@@ -101,8 +101,14 @@ func TestGetFullArtistsBuildsAndSortsData(t *testing.T) {
 	if !reflect.DeepEqual(got[0].Dates, []string{"01-01-2023", "31-12-2024"}) {
 		t.Fatalf("dates are not sorted: %v", got[0].Dates)
 	}
+	if !reflect.DeepEqual(got[0].DisplayLocations, []string{"London, UK", "Paris, France"}) {
+		t.Fatalf("unexpected display locations: %v", got[0].DisplayLocations)
+	}
 	if len(got[0].LastConcerts) != 1 || got[0].LastConcerts[0].City != "london-uk" {
 		t.Fatalf("unexpected last concerts: %+v", got[0].LastConcerts)
+	}
+	if got[0].LastConcerts[0].DisplayCity != "London, UK" {
+		t.Fatalf("unexpected display city: %q", got[0].LastConcerts[0].DisplayCity)
 	}
 	if !reflect.DeepEqual(got[0].LastConcerts[0].Dates, []string{"01-01-2023", "31-12-2024"}) {
 		t.Fatalf("concert dates are not sorted: %v", got[0].LastConcerts[0].Dates)
@@ -123,5 +129,21 @@ func TestGetArtistFull(t *testing.T) {
 	}
 	if missing := GetArtistFull(data, 999); missing != nil {
 		t.Fatalf("GetArtistFull returned %+v for an unknown id", missing)
+	}
+}
+
+
+func TestFormatLocation(t *testing.T) {
+	tests := map[string]string{
+		"nagoya-japan":        "Nagoya, Japan",
+		"los_angeles-usa":     "Los Angeles, USA",
+		"london-uk":           "London, UK",
+		"arc-en-ciel-france":  "Arc-En-Ciel, France",
+	}
+
+	for input, want := range tests {
+		if got := formatLocation(input); got != want {
+			t.Fatalf("formatLocation(%q) = %q, want %q", input, got, want)
+		}
 	}
 }

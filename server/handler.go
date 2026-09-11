@@ -270,7 +270,7 @@ func artistMatchesQuery(artist ArtistFull, query string) bool {
 
 func normalizeSearchText(value string) string {
 	value = strings.ToLower(strings.TrimSpace(value))
-	value = strings.NewReplacer("_", " ", "-", " ").Replace(value)
+	value = strings.NewReplacer("_", " ", "-", " ", ",", " ").Replace(value)
 	return strings.Join(strings.Fields(value), " ")
 }
 

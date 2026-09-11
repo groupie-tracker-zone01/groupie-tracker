@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/pages/artists.css?v=6">
+    <link rel="stylesheet" href="/static/css/pages/artists.css?v=7">
     <link rel="stylesheet" href="/static/css/components/header.css?v=5">
     <link rel="stylesheet" href="/static/css/components/footer.css?v=5">
     <link rel="stylesheet" href="/static/css/components/accessibility.css?v=1">
@@ -36,7 +36,7 @@
                 {{range .Members}}
                 <option value="{{.}}" label="Member"></option>
                 {{end}}
-                {{range .Locations}}
+                {{range .DisplayLocations}}
                 <option value="{{.}}" label="Location"></option>
                 {{end}}
                 <option value="{{.CreationDate}}" label="Creation date"></option>
@@ -61,7 +61,7 @@
                         <h3>Description</h3>
                         <p class="description">Created in {{.CreationDate}} and first album at {{.FirstAlbum}}</p>
                         <h3>Locations</h3>
-                        <p class="locations">{{- range $i, $loc := .Locations -}}
+                        <p class="locations">{{- range $i, $loc := .DisplayLocations -}}
                             {{- if $i}}, {{end -}}
                             {{- $loc -}}
                             {{- end -}}</p>
@@ -81,7 +81,7 @@
                         <div class="relations">
                             {{- range .LastConcerts -}}
                             <p>
-                                <strong class="relations-city">{{.City}}:</strong>
+                                <strong class="relations-city">{{.DisplayCity}}</strong>
                                 {{- range .Dates -}}
                                 <span class="relations-dates-tag">{{.}}</span>
                                 {{- end -}}
