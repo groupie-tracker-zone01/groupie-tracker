@@ -5,13 +5,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="only light">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/pages/home.css?v=5">
+    <link rel="stylesheet" href="/static/css/pages/home.css?v=7">
     <link rel="stylesheet" href="/static/css/components/header.css?v=5">
     <link rel="stylesheet" href="/static/css/components/footer.css?v=5">
     <link rel="stylesheet" href="/static/css/components/accessibility.css?v=1">
+    <link rel="stylesheet" href="/static/css/components/search-dropdown.css?v=1">
     <title>MetaRock</title>
 </head>
 
@@ -35,10 +37,53 @@
             </div>
 
             <form action="/artists" method="GET" class="search-form-overlay" id="artist-search">
-                <div class="search-bar">
-                    <label class="sr-only" for="artist-query">Artist name</label>
-                    <input id="artist-query" type="search" name="q" class="search" placeholder="Type an artist..." maxlength="30" autocomplete="off" value="{{.Query}}" required>
+                <div class="search-bar search-widget" data-search-widget>
+                    <label class="sr-only" for="artist-query">Search artists, members, locations or dates</label>
+                    <input id="artist-query" type="search" name="q" class="search"
+                        placeholder="Search artist, member, location or date..."
+                        maxlength="60" autocomplete="off" value="{{.Query}}" required
+                        aria-controls="home-search-suggestions" aria-expanded="false" aria-autocomplete="list">
                     <button type="submit" class="search-btn">Search</button>
+
+                    <ul class="dropdown-results" id="home-search-suggestions"
+                        aria-label="Search suggestions" hidden>
+                        {{range .Suggestions}}
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.Name}}">
+                                <span class="dropdown-value">{{.Name}}</span>
+                                <span class="dropdown-subtitle">Artist</span>
+                            </button>
+                        </li>
+                        {{range .Members}}
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.}}">
+                                <span class="dropdown-value">{{.}}</span>
+                                <span class="dropdown-subtitle">Member</span>
+                            </button>
+                        </li>
+                        {{end}}
+                        {{range .DisplayLocations}}
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.}}">
+                                <span class="dropdown-value">{{.}}</span>
+                                <span class="dropdown-subtitle">Location</span>
+                            </button>
+                        </li>
+                        {{end}}
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.CreationDate}}">
+                                <span class="dropdown-value">{{.CreationDate}}</span>
+                                <span class="dropdown-subtitle">Creation date</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="dropdown-option" data-value="{{.FirstAlbum}}">
+                                <span class="dropdown-value">{{.FirstAlbum}}</span>
+                                <span class="dropdown-subtitle">First album</span>
+                            </button>
+                        </li>
+                        {{end}}
+                    </ul>
                 </div>
             </form>
         </section>
@@ -55,6 +100,7 @@
 
     {{template "footer" .}}
 
+    <script src="/static/JS/search.js?v=1"></script>
     <script src="/static/JS/home.js"></script>
 </body>
 

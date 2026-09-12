@@ -2,9 +2,11 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -14,7 +16,7 @@ func testTemplates(t *testing.T) *template.Template {
 
 	const source = `
 {{define "home"}}HOME{{range .Artists}} {{.Name}} {{.Image}}{{end}}{{end}}
-{{define "artists"}}ARTISTS{{range .Artists}} {{.Name}}{{end}}{{end}}
+{{define "artists"}}ARTISTS{{range .Artists}} {{.Name}}{{end}}{{with .SelectedArtist}} DETAIL {{.Name}}{{end}}{{end}}
 {{define "400"}}BAD REQUEST{{end}}
 {{define "403"}}FORBIDDEN{{end}}
 {{define "404"}}NOT FOUND{{end}}
@@ -129,40 +131,133 @@ func TestRenderErrorsUsesRealTemplates(t *testing.T) {
 func TestArtistsSearch(t *testing.T) {
 	data := &AppData{}
 	fullArtists := []ArtistFull{
-		{Id: 1, Name: "Queen"},
-		{Id: 2, Name: "Queens of the Stone Age"},
-		{Id: 3, Name: "Metallica"},
+		{
+			Id:           1,
+			Name:         "Queen",
+			Members:      []string{"Freddie Mercury"},
+			CreationDate: 1970,
+			FirstAlbum:   "13-07-1973",
+			Locations:    []string{"london-uk"},
+		},
+		{
+			Id:           2,
+			Name:         "Queens of the Stone Age",
+			Members:      []string{"Josh Homme"},
+			CreationDate: 1996,
+			FirstAlbum:   "22-09-1998",
+			Locations:    []string{"los_angeles-usa"},
+		},
+		{Id: 3, Name: "Metallica", Members: []string{"James Hetfield"}, CreationDate: 1981},
 	}
 	handler := Routes(testTemplates(t), data, fullArtists)
 
-	t.Run("partial query", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/artists?q=que", nil)
+	tests := []struct {
+		name      string
+		query     string
+		want      []string
+		notWanted []string
+	}{
+		{
+			name:      "artist name is case insensitive and keeps partial matches",
+			query:     "QUEEN",
+			want:      []string{"Queen", "Queens of the Stone Age"},
+			notWanted: []string{"Metallica"},
+		},
+		{
+			name:      "member",
+			query:     "freddie",
+			want:      []string{"Queen"},
+			notWanted: []string{"Queens of the Stone Age", "Metallica"},
+		},
+		{
+			name:      "location accepts readable spaces",
+			query:     "los angeles usa",
+			want:      []string{"Queens of the Stone Age"},
+			notWanted: []string{"Metallica"},
+		},
+		{
+			name:      "creation date",
+			query:     "1970",
+			want:      []string{"Queen"},
+			notWanted: []string{"Queens of the Stone Age", "Metallica"},
+		},
+		{
+			name:      "first album",
+			query:     "13-07-1973",
+			want:      []string{"Queen"},
+			notWanted: []string{"Queens of the Stone Age", "Metallica"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/artists?q="+url.QueryEscape(tt.query), nil)
+			res := httptest.NewRecorder()
+			handler.ServeHTTP(res, req)
+
+			if res.Code != http.StatusOK {
+				t.Fatalf("got status %d, want %d", res.Code, http.StatusOK)
+			}
+			body := res.Body.String()
+			for _, expected := range tt.want {
+				if !strings.Contains(body, expected) {
+					t.Fatalf("search %q did not contain %q: %q", tt.query, expected, body)
+				}
+			}
+			for _, unexpected := range tt.notWanted {
+				if strings.Contains(body, unexpected) {
+					t.Fatalf("search %q unexpectedly contained %q: %q", tt.query, unexpected, body)
+				}
+			}
+		})
+	}
+}
+
+func TestArtistsPaginationAndDetail(t *testing.T) {
+	data := &AppData{}
+	fullArtists := make([]ArtistFull, 0, 12)
+	for i := 1; i <= 12; i++ {
+		fullArtists = append(fullArtists, ArtistFull{Id: i, Name: fmt.Sprintf("Band%02d", i)})
+	}
+	handler := Routes(testTemplates(t), data, fullArtists)
+
+	t.Run("second page with five results", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		handler.ServeHTTP(res, req)
+		handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, "/artists?q=Band&limit=5&page=2", nil))
 
 		if res.Code != http.StatusOK {
 			t.Fatalf("got status %d, want %d", res.Code, http.StatusOK)
 		}
 		body := res.Body.String()
-		if !strings.Contains(body, "Queen") || !strings.Contains(body, "Queens of the Stone Age") {
-			t.Fatalf("partial search did not return both matches: %q", body)
+		for _, expected := range []string{"Band06", "Band07", "Band08", "Band09", "Band10"} {
+			if !strings.Contains(body, expected) {
+				t.Fatalf("page 2 does not contain %q: %q", expected, body)
+			}
 		}
-		if strings.Contains(body, "Metallica") {
-			t.Fatalf("partial search returned an unrelated artist: %q", body)
+		for _, unexpected := range []string{"Band01", "Band05", "Band11", "Band12"} {
+			if strings.Contains(body, unexpected) {
+				t.Fatalf("page 2 unexpectedly contains %q: %q", unexpected, body)
+			}
 		}
 	})
 
-	t.Run("exact query has priority", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/artists?q=Queen", nil)
+	t.Run("detail route selects one artist", func(t *testing.T) {
 		res := httptest.NewRecorder()
-		handler.ServeHTTP(res, req)
+		handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, "/artist?id=7", nil))
 
-		body := res.Body.String()
-		if !strings.Contains(body, "Queen") {
-			t.Fatalf("exact search did not return Queen: %q", body)
+		if res.Code != http.StatusOK {
+			t.Fatalf("got status %d, want %d", res.Code, http.StatusOK)
 		}
-		if strings.Contains(body, "Queens of the Stone Age") {
-			t.Fatalf("exact search returned additional matches: %q", body)
+		if !strings.Contains(res.Body.String(), "DETAIL Band07") {
+			t.Fatalf("detail page does not contain selected artist: %q", res.Body.String())
+		}
+	})
+
+	t.Run("unknown artist returns 404", func(t *testing.T) {
+		res := httptest.NewRecorder()
+		handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, "/artist?id=99", nil))
+		if res.Code != http.StatusNotFound {
+			t.Fatalf("got status %d, want %d", res.Code, http.StatusNotFound)
 		}
 	})
 }
