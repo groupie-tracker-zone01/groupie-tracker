@@ -28,9 +28,12 @@ main {
     padding: 0.5rem;
 }
 
+.results-search-button {
+    border-radius: 0 50px 50px 0;
+}
+
 .card {
     overflow-y: auto;
-    /* display: flex; */
     align-self: center;
     background-color: rgba(229, 234, 234, 0.907);
     width: 70%;
@@ -45,7 +48,6 @@ main {
     display: flex;
     flex-direction: column;
     width: 100%;
-    /* gap: 1rem; */
 }
 
 .title-card {
@@ -101,8 +103,6 @@ main {
     width: 90%;
     padding-bottom: 0.5rem;
     padding-top: 0.5rem;
-    /* margin-left: 2rem; */
-    /* margin-top: -0.7rem; */
     border-top: none;
     box-shadow: 0 2px 10px black;
     color: hsl(46, 100%, 38%);
