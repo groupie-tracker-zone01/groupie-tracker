@@ -30,6 +30,15 @@ Pour utiliser un autre port :
 PORT=9090 go run .
 ```
 
+## API Groupie Tracker
+
+Le projet utilise les endpoints officiels suivants :
+
+- Artistes : <https://groupietrackers.01edu.ai/api/artists>
+- Localisations : <https://groupietrackers.01edu.ai/api/locations>
+- Dates : <https://groupietrackers.01edu.ai/api/dates>
+- Relations : <https://groupietrackers.01edu.ai/api/relation>
+
 ## Vérifier le projet
 
 ```sh
