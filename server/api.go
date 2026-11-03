@@ -80,7 +80,7 @@ type ArtistFull struct {
 }
 
 const (
-	baseURL           = "https://groupietrackers.herokuapp.com/api"
+	baseURL           = "https://groupietrackers.01edu.ai/api"
 	apiRequestTimeout = 5 * time.Second
 )
 
